@@ -1,5 +1,6 @@
 package com.web.catsupplies.user.application;
 
+import com.web.catsupplies.user.domain.Role;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -7,7 +8,7 @@ import lombok.Getter;
 @Builder
 public class LoginResponse {
 
-    private Long id;
     private String email;
     private String name;
+    private Role role;
 }
