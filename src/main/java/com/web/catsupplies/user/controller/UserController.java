@@ -1,6 +1,8 @@
 package com.web.catsupplies.user.controller;
 
 import com.web.catsupplies.user.application.*;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -25,9 +27,36 @@ public class UserController {
 
     // 로그인
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request) {
-        LoginResponse response = userService.login(request);
-        return ResponseEntity.ok(response);
+    public ResponseEntity<LoginResponse> login(@RequestBody LoginRequest request, HttpServletResponse response) {
+        LoginResponse loginResponse = userService.login(request); // 사용자 정보 가져오기
+
+        // JWT 발급
+        String accessToken = userService.generateAccessToken(loginResponse.getEmail());
+        String refreshToken = userService.generateRefreshToken(loginResponse.getEmail());
+
+        // RefreshToken 을 Redis 에 저장
+        userService.RedisRefreshToken(loginResponse.getEmail(), refreshToken);
+
+        // AccessToken 을 HttpOnly 쿠키에 저장
+        Cookie cookie = new Cookie("accessToken", accessToken);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(60 * 60);
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok(loginResponse);
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        Cookie accessTokenCookie = new Cookie("accessToken", null);
+        accessTokenCookie.setMaxAge(0);
+        accessTokenCookie.setHttpOnly(true);
+        accessTokenCookie.setPath("/");
+
+        response.addCookie(accessTokenCookie);
+
+        return ResponseEntity.ok("로그아웃 완료");
     }
 
 }
