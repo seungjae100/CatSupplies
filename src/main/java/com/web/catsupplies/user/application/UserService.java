@@ -6,10 +6,13 @@ import com.web.catsupplies.user.domain.Role;
 import com.web.catsupplies.user.domain.User;
 import com.web.catsupplies.user.repository.RefreshTokenRepository;
 import com.web.catsupplies.user.repository.UserRepository;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 
+@Validated
 @Service
 @RequiredArgsConstructor
 public class UserService {
@@ -20,7 +23,7 @@ public class UserService {
     private final JwtTokenProvider jwtTokenProvider;
 
     // 회원가입
-    public RegisterResponse register(RegisterRequest request) {
+    public RegisterResponse register(@Valid RegisterRequest request) {
         // 이메일 중복 확인
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
@@ -47,7 +50,7 @@ public class UserService {
     }
 
     // 로그인
-    public LoginResponse login(LoginRequest request) {
+    public LoginResponse login(@Valid LoginRequest request) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("이메일을 찾을 수 없습니다."));
         // 비밀번호 검증 ( 클라이언트에서 요청이 온 비밀번호와 유저의 DB 에서 가져온 비밀번호를 비교했는데 다르다면)
