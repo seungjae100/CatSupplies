@@ -6,11 +6,15 @@ import com.web.catsupplies.user.domain.Role;
 import com.web.catsupplies.user.domain.User;
 import com.web.catsupplies.user.repository.RefreshTokenRepository;
 import com.web.catsupplies.user.repository.UserRepository;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
+import org.springframework.web.util.WebUtils;
 
 @Validated
 @Service
@@ -21,6 +25,7 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final RefreshTokenRepository refreshTokenRepository;
     private final JwtTokenProvider jwtTokenProvider;
+    private final TokenService tokenService;
 
     // 회원가입
     public RegisterResponse register(@Valid RegisterRequest request) {
@@ -65,24 +70,19 @@ public class UserService {
                 .build();
     }
 
-    // AccessToken 생성 ( 쿠키용 )
-    public String generateAccessToken(String email) {
-        return jwtTokenProvider.createAccessToken(email);
+    // 로그아웃
+    public void logout(HttpServletRequest request, HttpServletResponse response) {
+        // AccessToken 에서 이메일 추출 (삼항연산자)
+        String accessToken = WebUtils.getCookie(request, "accessToken") != null ?
+                WebUtils.getCookie(request, "accessToken").getValue() : null;
+
+        if (accessToken != null && jwtTokenProvider.validateToken(accessToken)) {
+            String email = jwtTokenProvider.getEmail(accessToken);
+
+            // RefreshToken 삭제 (Redis 에서 삭제 )
+            tokenService.removeRefreshToken(email, response);
+        }
     }
 
-    // RefreshToken 생성 ( Redis )
-    public String generateRefreshToken(String email) {
-        return jwtTokenProvider.createRefreshToken(email);
-    }
-
-    // RefreshToken 을 Redis 에 저장
-    public void RedisRefreshToken(String email, String refreshToken) {
-        refreshTokenRepository.save(new RefreshToken(email, refreshToken));
-    }
-
-    // RefreshToken 삭제 ( 로그아웃 )
-    public void removeRefreshToken(String email) {
-        refreshTokenRepository.deleteById(email);
-    }
 
 }
