@@ -51,27 +51,15 @@ public class UserController {
     }
 
     @PostMapping("/logout")
-    public ResponseEntity<?> logout(HttpServletResponse response, HttpServletRequest request) {
+    public ResponseEntity<String> logout(HttpServletResponse response, HttpServletRequest request) {
         userService.logout(request, response);
-        return ResponseEntity.ok("로그아웃 완료");
+        return ResponseEntity.ok("로그아웃 완료되었습니다.");
     }
 
-    @PostMapping("/re_accessToken")
-    public ResponseEntity<Map<String, String>> reAccessToken(HttpServletResponse response, HttpServletRequest request) {
-        // AccessToken 을 재발급할 이메일을 가져옴
-        String accessToken = WebUtils.getCookie(request, "accessToken") != null ?
-                WebUtils.getCookie(request, "accessToken").getValue() : null;
-
-        // 만약 AccessToken 이 null 이거나 유효하지 않은 AccessToken 인 경우,
-        // AccessToken 이 없다는 메세지를 바디에 보낸다.
-        if (accessToken == null || !jwtTokenProvider.validateToken(accessToken)) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(Map.of("message", "AccessToken이 없습니다."));
-        }
-
-        String email = jwtTokenProvider.getEmail(accessToken);
-        tokenService.re_accessToken(response, email);
-
-        return ResponseEntity.ok(Map.of("message", "AccessToken이 재발급되었습니다."));
+    @PostMapping("/reAccessToken")
+    public ResponseEntity<String> reAccessToken(HttpServletRequest request, HttpServletResponse response) {
+        tokenService.reAccessToken(response, request);
+        return ResponseEntity.ok(userService.reAccessToken(request, response));
     }
 
 

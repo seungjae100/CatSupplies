@@ -30,7 +30,7 @@ public class User extends BaseTimeEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private Role role;
+    private Role role = Role.USER;
 
     @Builder
     public User(String email, String name, String password, String phone, String address, Role role) {

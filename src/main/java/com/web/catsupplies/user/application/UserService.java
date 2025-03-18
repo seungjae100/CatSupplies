@@ -70,18 +70,14 @@ public class UserService {
                 .build();
     }
 
+    // AccessToken 재발급
+    public String reAccessToken(HttpServletRequest request, HttpServletResponse response) {
+        return tokenService.reAccessToken(response, request);
+    }
+
     // 로그아웃
     public void logout(HttpServletRequest request, HttpServletResponse response) {
-        // AccessToken 에서 이메일 추출 (삼항연산자)
-        String accessToken = WebUtils.getCookie(request, "accessToken") != null ?
-                WebUtils.getCookie(request, "accessToken").getValue() : null;
-
-        if (accessToken != null && jwtTokenProvider.validateToken(accessToken)) {
-            String email = jwtTokenProvider.getEmail(accessToken);
-
-            // RefreshToken 삭제 (Redis 에서 삭제 )
-            tokenService.removeRefreshToken(email, response);
-        }
+        tokenService.logout(request, response);
     }
 
 
