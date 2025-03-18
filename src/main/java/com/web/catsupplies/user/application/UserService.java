@@ -1,5 +1,6 @@
 package com.web.catsupplies.user.application;
 
+import com.web.catsupplies.common.jwt.CookieUtils;
 import com.web.catsupplies.common.jwt.JwtTokenProvider;
 import com.web.catsupplies.user.domain.RefreshToken;
 import com.web.catsupplies.user.domain.Role;
@@ -23,12 +24,10 @@ public class UserService {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
-    private final RefreshTokenRepository refreshTokenRepository;
-    private final JwtTokenProvider jwtTokenProvider;
     private final TokenService tokenService;
 
     // 회원가입
-    public RegisterResponse register(@Valid RegisterRequest request) {
+    public void register(@Valid RegisterRequest request) {
         // 이메일 중복 확인
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
@@ -46,16 +45,10 @@ public class UserService {
 
         // 요청 DB에 저장
         userRepository.save(user);
-
-        // 요청 완료에 따른 응답 반환
-        return RegisterResponse.builder()
-                .email(user.getEmail())
-                .name(user.getName())
-                .build();
     }
 
     // 로그인
-    public LoginResponse login(@Valid LoginRequest request) {
+    public void login(@Valid LoginRequest request, HttpServletResponse response) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("이메일을 찾을 수 없습니다."));
         // 비밀번호 검증 ( 클라이언트에서 요청이 온 비밀번호와 유저의 DB 에서 가져온 비밀번호를 비교했는데 다르다면)
@@ -63,11 +56,15 @@ public class UserService {
             throw new IllegalArgumentException("비밀번호가 틀렸습니다.");
         }
 
-        return LoginResponse.builder()
-                .email(user.getEmail())
-                .name(user.getName())
-                .role(user.getRole())
-                .build();
+        // JWT 발급
+        String accessToken = tokenService.createAccessToken(user.getEmail());
+        String refreshToken = tokenService.createRefreshToken(user.getEmail());
+
+        // RefreshToken 을 Redis 에 저장
+        tokenService.RedisSaveRefreshToken(user.getEmail(), refreshToken);
+        // AccessToken HttpOnly 쿠키에 저장
+        CookieUtils.setCookie(response, "accessToken", accessToken, 60 * 60); // 1 시간
+
     }
 
     // AccessToken 재발급
