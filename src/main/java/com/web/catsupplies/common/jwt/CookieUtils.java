@@ -1,7 +1,9 @@
 package com.web.catsupplies.common.jwt;
 
 import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.web.util.WebUtils;
 
 public class CookieUtils {
 
@@ -12,6 +14,12 @@ public class CookieUtils {
         cookie.setPath("/");
         cookie.setMaxAge(maxAge);
         response.addCookie(cookie);
+    }
+
+    // 쿠키값 가져오기
+    public static String getCookie(HttpServletRequest request, String cookieName) {
+        Cookie cookie = WebUtils.getCookie(request, cookieName);
+        return (cookie != null) ? cookie.getValue() : null;
     }
 
     // HttpOnly 쿠키 삭제
