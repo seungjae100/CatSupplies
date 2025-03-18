@@ -27,7 +27,7 @@ public class UserService {
     private final TokenService tokenService;
 
     // 회원가입
-    public void register(@Valid RegisterRequest request) {
+    public void register(RegisterRequest request) {
         // 이메일 중복 확인
         if (userRepository.existsByEmail(request.getEmail())) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
@@ -48,7 +48,7 @@ public class UserService {
     }
 
     // 로그인
-    public void login(@Valid LoginRequest request, HttpServletResponse response) {
+    public void login(LoginRequest request, HttpServletResponse response) {
         User user = userRepository.findByEmail(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("이메일을 찾을 수 없습니다."));
         // 비밀번호 검증 ( 클라이언트에서 요청이 온 비밀번호와 유저의 DB 에서 가져온 비밀번호를 비교했는데 다르다면)
@@ -68,8 +68,8 @@ public class UserService {
     }
 
     // AccessToken 재발급
-    public String reAccessToken(HttpServletRequest request, HttpServletResponse response) {
-        return tokenService.reAccessToken(response, request);
+    public void reAccessToken(HttpServletResponse response, String email) {
+        tokenService.reAccessToken(response, email);
     }
 
     // 로그아웃

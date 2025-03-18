@@ -58,8 +58,8 @@ public class CompanyService {
     }
 
     // AccessToken 재발급
-    public String reAccessToken(HttpServletRequest request, HttpServletResponse response) {
-        return tokenService.reAccessToken(response, request);
+    public void reAccessToken(HttpServletResponse response, String email) {
+         tokenService.reAccessToken(response, email);
     }
 
     // 로그아웃

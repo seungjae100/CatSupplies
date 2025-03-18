@@ -35,29 +35,25 @@ public class TokenService {
         refreshTokenRepository.save(new RefreshToken(email, refreshToken));
     }
 
+    // 재발급
     @Transactional
-    public String reAccessToken(HttpServletResponse response, HttpServletRequest request) {
-        // AccessToken 쿠키에서 가져오기
-        String accessToken = CookieUtils.getCookie(request, "accessToken");
-
-        // AccessToken 이 없거나 유효성이 상실한 경우는 예외를 발생시킨다
-        if (accessToken == null || jwtTokenProvider.validateToken(accessToken)) {
-            throw new CustomUnauthorizedException("유효하지 않은 AccessToken입니다. 재발급해주세요.");
-        }
-        // AccessToken 에 있는 이메일 사용자 정보를 가져온다.
-        String email = jwtTokenProvider.getEmail(accessToken);
-        // 이메일 정보에서 저장된 RefreshToken 이 있는지 확인한다.
+    public void reAccessToken(HttpServletResponse response, String email) {
+        // 저장된 RefreshToken 가져오기
         String storedRefreshToken = getStoredRefreshToken(email);
 
+        // RefreshToken 이 없거나 유효하지 않으면 예외 발생
         if (storedRefreshToken == null || !validateRefreshToken(storedRefreshToken)) {
-            throw new CustomUnauthorizedException("RefreshToken이 유효하지 않습니다. 다시 로그인해주세요");
+            throw new CustomUnauthorizedException("RefreshToken 이 유효하지 않습니다. 다시 로그인해주세요.");
         }
+
+        // 기존 만료된 AccessToken 삭제
+        CookieUtils.deleteCookie(response, "accessToken");
+
         // 새로운 AccessToken 발급
         String newAccessToken = createAccessToken(email);
-        // AccessToken 을 HttpOnly에 저장
-        CookieUtils.setCookie(response, "accessToken", newAccessToken, 60 * 60);
 
-        return "AccessToken이 재발급되었습니다.";
+        // 새 AccessToken 을 HttpOnly 쿠키에 저장
+        CookieUtils.setCookie(response, "accessToken", newAccessToken, 60 * 60);
     }
 
     // RefreshToken 검증
@@ -65,7 +61,7 @@ public class TokenService {
         return jwtTokenProvider.validateToken(refreshToken);
     }
 
-    // 저장된 RefreshToken 가져오기
+    // 이메일에서 저장된 RefreshToken 가져오기
     public String getStoredRefreshToken(String email) {
         return refreshTokenRepository.findById(email)
                 .map(RefreshToken::getRefreshToken)
@@ -78,10 +74,33 @@ public class TokenService {
         // AccessToken 쿠키에서 가져오기
         String accessToken = CookieUtils.getCookie(request, "accessToken");
 
-        if (accessToken != null && jwtTokenProvider.validateToken(accessToken)) {
-            String email = jwtTokenProvider.getEmail(accessToken);
+        // AccessToken 이 없으면 이미 로그아웃된 상태 → 정상 종료
+        if (accessToken == null) {
+            return; // 예외 발생 X, 그냥 정상 종료
+        }
 
-            // RefreshToken 토큰 삭제
+        String email = null;
+
+        // AccessToken 이 유효하면 email 추출
+        if (jwtTokenProvider.validateToken(accessToken)) {
+            jwtTokenProvider.getEmail(accessToken);
+        } else {
+            // AccessToken 이 만료된 경우 email 추출
+            email = jwtTokenProvider.getEmailFromExpiredToken(accessToken);
+
+            if (email != null) { // 이메일이 있으면 RefreshToken 확인
+                String refreshToken = getStoredRefreshToken(email);
+                if (refreshToken != null && validateRefreshToken(refreshToken)) {
+                    reAccessToken(response, email); // AccessToken 재발급 후 로그아웃
+                }
+            }
+
+            // email 이 없으면 RefreshToken 도 없거나 변조된 경우이므로 종료
+            if (email == null) {
+                return;
+            }
+
+            // RefreshToken 삭제 (로그아웃 처리)
             refreshTokenRepository.deleteById(email);
 
             // AccessToken 쿠키 삭제
