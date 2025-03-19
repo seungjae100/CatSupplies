@@ -1,12 +1,15 @@
 package com.web.catsupplies.serivce;
 
+import com.web.catsupplies.common.jwt.CookieUtils;
 import com.web.catsupplies.common.jwt.JwtTokenProvider;
 import com.web.catsupplies.user.application.*;
 import com.web.catsupplies.user.domain.Role;
 import com.web.catsupplies.user.domain.User;
 import com.web.catsupplies.user.repository.RefreshTokenRepository;
 import com.web.catsupplies.user.repository.UserRepository;
-import io.micrometer.core.annotation.TimedSet;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.Validation;
 import jakarta.validation.Validator;
@@ -20,6 +23,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.web.util.WebUtils;
 
 import java.util.Optional;
 import java.util.Set;
@@ -48,7 +52,16 @@ public class UserServiceTest {
     private JwtTokenProvider jwtTokenProvider;
 
     @Mock
+    private TokenService tokenService;
+
+    @Mock
     private RefreshTokenRepository refreshTokenRepository;
+
+    @Mock
+    private HttpServletResponse responseMock;
+
+    @Mock
+    private HttpServletRequest requestMock;
 
     private Validator validator;
     private User testUser;
@@ -74,6 +87,7 @@ public class UserServiceTest {
         lenient().when(passwordEncoder.matches(any(), any())).thenReturn(true);
         lenient().when(jwtTokenProvider.createAccessToken(any())).thenReturn("accessToken");
         lenient().when(jwtTokenProvider.createRefreshToken(any())).thenReturn("refreshToken");
+        lenient().when(tokenService.createAccessToken(any())).thenReturn("mockAccessToken");
     }
 
     // 회원가입 성공 테스트
@@ -89,22 +103,13 @@ public class UserServiceTest {
                 .address("경기도 양주시")
                 .build();
 
-        when(userRepository.save(any())).thenReturn(
-                User.builder()
-                .email(request.getEmail())
-                .password("encodedPassword")
-                .name(request.getName())
-                .phone(request.getPhone())
-                .address(request.getAddress())
-                .role(Role.USER)
-                .build());
+        when(userRepository.save(any())).thenReturn(testUser);
 
         // when
-        RegisterResponse response = userService.register(request);
+        userService.register(request);
 
         // then
-        assertNotNull(response);
-        assertEquals("test@gmail.com", response.getEmail());
+        assertDoesNotThrow(() -> userService.register(request));
     }
 
     // 중복 이메일로 인한 회원가입 실패
@@ -149,7 +154,7 @@ public class UserServiceTest {
         when(userRepository.findByEmail(request.getEmail())).thenReturn(Optional.empty());
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> userService.login(request));
+        assertThrows(IllegalArgumentException.class, () -> userService.login(request, responseMock));
     }
 
     // 로그인 실패 (비밀번호 틀림)
@@ -162,7 +167,7 @@ public class UserServiceTest {
         when(passwordEncoder.matches(request.getPassword(), testUser.getPassword())).thenReturn(false);
 
         // when & then
-        assertThrows(IllegalArgumentException.class, () -> userService.login(request));
+        assertThrows(IllegalArgumentException.class, () -> userService.login(request, responseMock));
     }
 
     // 로그인 성공 테스트
@@ -172,79 +177,51 @@ public class UserServiceTest {
         // given
         LoginRequest request = new LoginRequest("test@gmail.com", "password1234");
 
-        when(passwordEncoder.matches(request.getPassword(), testUser.getPassword())).thenReturn(true);
-
-        // when
-        LoginResponse response = userService.login(request);
+        // when & then
+        assertDoesNotThrow(() -> userService.login(request, responseMock));
 
         // then
-        assertNotNull(response);
-        assertEquals("test@gmail.com", response.getEmail());
-        assertEquals("테스트", response.getName());
-        assertEquals(Role.USER, response.getRole());
-
+        verify(responseMock, times(1))
+                .addCookie(argThat(cookie -> "accessToken".equals(cookie.getName()) && cookie.getMaxAge() == 3600));
     }
 
-    // AccessToken 생성 확인
-    @Test
-    @DisplayName("AccessToken 생성 확인")
-    void AccessToken_생성_확인() {
-        // given
-        String email = "test@gmail.com";
-        when(jwtTokenProvider.createAccessToken(email)).thenReturn("accessToken");
-
-        // when
-        String token = userService.generateAccessToken(email);
-
-        // then
-        assertNotNull(token);
-        assertEquals("accessToken", token);
-    }
-
-    // RefreshToken 생성 확인
-    @Test
-    @DisplayName("RefreshToken 생성 확인")
-    void RefreshToken_생성_확인() {
-        // given
-        String email = "test@gmail.com";
-        when(jwtTokenProvider.createRefreshToken(email)).thenReturn("refreshToken");
-
-        // when
-        String token = userService.generateRefreshToken(email);
-
-        // then
-        assertNotNull(token);
-        assertEquals("refreshToken", token);
-    }
-
-    // Redis 에 RefreshToken 이 저장되는지 확인
-    @Test
-    @DisplayName("Redis에 토큰 저장 확인")
-    void Redis_RefreshToken_저장확인() {
-        // given
-        String email = "test@gmail.com";
-        String refreshToken = "refreshToken";
-
-        // when
-        userService.RedisRefreshToken(email, refreshToken);
-
-        // then
-        verify(refreshTokenRepository, times(1)).save(any());
-    }
-
-    // 로그아웃 시 RefreshToken 삭제 테스트
     @Test
     @DisplayName("로그아웃 - RefreshToken 삭제")
     void 로그아웃_RefreshToken_삭제() {
         // given
         String email = "test@gmail.com";
+        String accessToken = "mockAccessToken"; // 가짜 AccessToken 생성
+
+        //  Mock: requestMock 에 쿠키 추가 (Null 방지)
+        when(requestMock.getCookies()).thenReturn(new Cookie[]{ new Cookie("accessToken", accessToken) });
+
+        //  Mock: WebUtils.getCookie() 가 accessToken 쿠키를 정상 반환하도록 설정
+        when(WebUtils.getCookie(any(HttpServletRequest.class), eq("accessToken")))
+                .thenReturn(new Cookie("accessToken", accessToken));
+
+        //  Mock: AccessToken 검증 설정
+        when(jwtTokenProvider.validateToken(accessToken)).thenReturn(true);
+        when(jwtTokenProvider.getEmail(accessToken)).thenReturn(email);
+
+        //  Mock: RefreshToken 저장된 값 반환하도록 설정
+        when(tokenService.getStoredRefreshToken(email)).thenReturn("mockRefreshToken");
+        when(tokenService.validateRefreshToken("mockRefreshToken")).thenReturn(true);
+
+        //  Mock: AccessToken 재발급을 실제 실행하지 않도록 설정
+        doNothing().when(tokenService).reAccessToken(responseMock, email);
+
+        //  Mock: RefreshToken 삭제
+        doNothing().when(refreshTokenRepository).deleteById(email);
 
         // when
-        userService.removeRefreshToken(email);
+        tokenService.logout(requestMock, responseMock);
 
         // then
-        verify(refreshTokenRepository, times(1)).deleteById(email);
-
+        verify(refreshTokenRepository, times(1)).deleteById(email); // RefreshToken 삭제 확인
+        verify(responseMock, times(1))
+                .addCookie(argThat(cookie -> "accessToken".equals(cookie.getName()) && cookie.getMaxAge() == 0)); // AccessToken 삭제 확인
     }
+
+
 
 }

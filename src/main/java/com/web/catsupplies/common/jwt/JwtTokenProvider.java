@@ -76,4 +76,20 @@ public class JwtTokenProvider {
         return Jwts.parserBuilder().setSigningKey(key).build()
                 .parseClaimsJws(token).getBody().getSubject(); // subject 에 저장된 email 값 반환
     }
+
+    // 만료된 AccessToken에서도 email을 추출할 수 있도록 처리 (재발급시 필요)
+    public String getEmailFromExpiredToken(String token) {
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getSubject(); // 정상적인 토큰이면 email 반환
+        } catch (ExpiredJwtException e) {
+            return e.getClaims().getSubject(); // 만료된 토큰에서도 email 반환 가능
+        } catch (Exception e) {
+            return null; // 토큰이 손상되었거나 변조된 경우 null 반환
+        }
+    }
 }

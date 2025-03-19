@@ -42,8 +42,8 @@ public class CompanyController {
     }
 
     @PostMapping("/reAccessToken")
-    public ResponseEntity<String> reAccessToken(HttpServletRequest request, HttpServletResponse response) {
-        tokenService.reAccessToken(response, request);
-        return ResponseEntity.ok(companyService.reAccessToken(request, response));
+    public ResponseEntity<String> reAccessToken(HttpServletResponse response, String email) {
+        tokenService.reAccessToken(response, email);
+        return ResponseEntity.ok("AccessToken이 재발급되었습니다.");
     }
 }
