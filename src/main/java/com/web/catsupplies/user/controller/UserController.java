@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.RestController;
 public class UserController {
 
     private final UserService userService;
-    private final TokenService tokenService;
 
     // 회원가입
     @PostMapping("/register")
@@ -44,7 +43,7 @@ public class UserController {
     // 재발급토큰
     @PostMapping("/reAccessToken")
     public ResponseEntity<String> reAccessToken(HttpServletResponse response, String email) {
-        tokenService.reAccessToken(response, email);
+        userService.reAccessToken(response, email);
         return ResponseEntity.ok("AccessToken이 재발급되었습니다.");
     }
 
