@@ -44,7 +44,7 @@ public class Company extends BaseTimeEntity {
     private Role role = Role.COMPANY;
 
     @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Product> products = new ArrayList<>();
+    private List<Product> product = new ArrayList<>();
 
     @Builder
     public Company(String email, String password, String phone, String address, String companyName, String boss, String licenseNumber) {
@@ -55,5 +55,22 @@ public class Company extends BaseTimeEntity {
         this.companyName = companyName;
         this.boss = boss;
         this.licenseNumber = licenseNumber;
+        this.product = new ArrayList<>();
+    }
+
+    // Product: 연관관계 편의 메서드 추가
+    public void addProduct(Product product) {
+        this.product.add(product);
+        if (product.getCompany() != this) {
+            product.setCompany(this);
+        }
+    }
+
+    // 제품 삭제
+    public void removeProduct(Product product) {
+        this.product.remove(product);
+        if (product.getCompany() == this) {
+            product.setCompany(null); // 관계 해제
+        }
     }
 }

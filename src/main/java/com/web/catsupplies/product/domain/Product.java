@@ -48,9 +48,29 @@ public class Product extends BaseTimeEntity {
         this.company = company;
         this.stock = stock;
 
-        // Product가 Stock 과 연결할 때, Stock도 Product를 설정하도록 함
-        if(stock != null) {
+        // Product 가 Stock 과 연결할 때, Stock 도 Product 를 설정하도록 함
+        if (stock != null) {
             stock.setProduct(this);
+        }
+        // Product 가 Company 와 연결할 때 Company 도 Product 를 설정하도록 함
+        if (company != null) {
+            company.addProduct(this);
+        }
+    }
+
+    // Stock: 연관관계 편의 메서드 추가
+    public void setStock(Stock stock) {
+        this.stock = stock;
+        if (stock.getProduct() != this) {
+            stock.setProduct(this);
+        }
+    }
+
+    // Company: 연관관계 편의 메서드 추가
+    public void setCompany(Company company) {
+        this.company = company;
+        if (!company.getProduct().contains(this)) {
+            company.getProduct().add(this); // 양방향 관계 유지
         }
     }
 }

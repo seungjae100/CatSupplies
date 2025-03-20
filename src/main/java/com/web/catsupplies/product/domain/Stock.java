@@ -10,7 +10,6 @@ import java.util.List;
 @Getter
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
-@Builder
 public class Stock {
 
     @Id
@@ -27,8 +26,75 @@ public class Stock {
     @OneToMany(mappedBy = "stock", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<StockHistory> stockHistories = new ArrayList<>();
 
+    @Builder
+    public Stock(int quantity, Product product) {
+        this.quantity = quantity;
+        this.product = product;
+
+        // Product 가 Stock 과 연결할 때, Product 도 Stock 를 설정하도록 함
+        if (product != null) {
+            product.setStock(this);
+        }
+    }
+
+    // Product: 연관관계 편의 메서드 추가
     public void setProduct(Product product) {
         this.product = product;
+        if (product.getStock() != this) {
+            product.setStock(this);
+        }
     }
+
+    // StockHistory 연관관계 편의 메서드 추가
+    public void addStockHistory(StockHistory stockHistory) {
+        this.stockHistories.add(stockHistory);
+        if (stockHistory.getStock() != this) {
+            stockHistory.setStock(this);
+        }
+    }
+
+    // 재고 증가
+    public void increaseStock(int amount) {
+        this.quantity += amount;
+        addStockHistory(StockStatus.STOCK_INCREASED, amount);
+    }
+
+    // 재고 감소
+    public void decreaseStock(int amount) {
+        if (this.quantity < amount) {
+            throw new IllegalArgumentException("재고가 부족합니다.");
+        }
+        this.quantity -= amount;
+        addStockHistory(StockStatus.STOCK_DECREASED, -amount);
+    }
+
+    // 재고 입고 처리 (입고, 재입고)
+    public void inboundStock(int amount) {
+        this.quantity += amount;
+        addStockHistory(StockStatus.INBOUND, amount);
+    }
+
+    // 재고 출고 처리
+    public void outboundStock(int amount) {
+        if (this.quantity < amount) {
+            throw new IllegalArgumentException("출고할 재고가 부족합니다.");
+        }
+        this.quantity -= amount;
+        addStockHistory(StockStatus.OUTBOUND, -amount);
+    }
+
+    // 품절 처리
+    public void soldOut() {
+        this.quantity = 0;
+        addStockHistory(StockStatus.SOLD_OUT, 0);
+    }
+
+    // 재고 변경이력을 자동으로 저장
+    private void addStockHistory(StockStatus status, int quantityChange) {
+        StockHistory history = StockHistory.createHistory(this, status, quantityChange);
+        this.stockHistories.add(history);
+    }
+
+
 
 }
