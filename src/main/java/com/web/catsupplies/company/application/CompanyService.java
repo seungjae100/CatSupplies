@@ -5,6 +5,7 @@ import com.web.catsupplies.common.jwt.JwtTokenProvider;
 import com.web.catsupplies.company.domain.Company;
 import com.web.catsupplies.company.repository.CompanyRepository;
 import com.web.catsupplies.user.application.TokenService;
+import com.web.catsupplies.user.domain.Role;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -48,8 +49,8 @@ public class CompanyService {
             throw new IllegalArgumentException("잘못된 비밀번호입니다.");
         }
 
-        String accessToken = jwtTokenProvider.createAccessToken(company.getEmail());
-        String refreshToken = jwtTokenProvider.createRefreshToken(company.getEmail());
+        String accessToken = jwtTokenProvider.createAccessToken(company.getEmail(), Role.COMPANY.name());
+        String refreshToken = jwtTokenProvider.createRefreshToken(company.getEmail(), Role.COMPANY.name());
 
         tokenService.RedisSaveRefreshToken(company.getEmail(), refreshToken);
 
@@ -58,8 +59,9 @@ public class CompanyService {
     }
 
     // AccessToken 재발급
-    public void reAccessToken(HttpServletResponse response, String email) {
-         tokenService.reAccessToken(response, email);
+    public void reAccessToken(HttpServletRequest request, HttpServletResponse response) {
+        String expiredToken = CookieUtils.getCookie(request, "accessToken");
+        tokenService.reAccessToken(response, expiredToken);
     }
 
     // 로그아웃

@@ -42,8 +42,8 @@ public class UserController {
 
     // 재발급토큰
     @PostMapping("/reAccessToken")
-    public ResponseEntity<String> reAccessToken(HttpServletResponse response, String email) {
-        userService.reAccessToken(response, email);
+    public ResponseEntity<String> reAccessToken(HttpServletRequest request, HttpServletResponse response) {
+        userService.reAccessToken(request, response);
         return ResponseEntity.ok("AccessToken이 재발급되었습니다.");
     }
 

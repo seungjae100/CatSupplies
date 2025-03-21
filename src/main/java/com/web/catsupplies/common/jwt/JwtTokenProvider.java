@@ -35,18 +35,19 @@ public class JwtTokenProvider {
     }
 
     // AccessToken email 기반으로 생성
-    public String createAccessToken(String email) {
-        return createToken(email, accessTokenExpiration);
+    public String createAccessToken(String email, String role) {
+        return createToken(email, accessTokenExpiration, role);
     }
     // RefreshToken email 기반으로 생성
-    public String createRefreshToken(String email) {
-        return createToken(email, refreshTokenExpiration);
+    public String createRefreshToken(String email, String role) {
+        return createToken(email, refreshTokenExpiration, role);
     }
 
     // JWT 토큰 생성 로직
-    private String createToken(String email, long expirationTime) {
+    private String createToken(String email, long expirationTime, String role) {
         return Jwts.builder()
                 .setSubject(email) // 토큰의 subject (사용자의 email 저장)
+                .claim("role", role)
                 .setIssuedAt(new Date()) // 토큰 발급 시간
                 .setExpiration(new Date(System.currentTimeMillis() + expirationTime)) // 토큰 만료 시간 설정
                 .signWith(key, SignatureAlgorithm.HS256) // HMAC SHA256 알고리즘을 사용하여 서명
@@ -91,5 +92,30 @@ public class JwtTokenProvider {
         } catch (Exception e) {
             return null; // 토큰이 손상되었거나 변조된 경우 null 반환
         }
+    }
+    // 만료된 AccessToken에서도 role을 추출할 수 있도록 처리 (재발급시 필요)
+    public String getRoleFromExpiredToken(String token) {
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(key)
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .get("role", String.class);
+        } catch (ExpiredJwtException e) {
+            return e.getClaims().get("role", String.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    // 토큰에서 role 정보를 가져온다.
+    public String getRole(String token) {
+        return Jwts.parserBuilder()
+                .setSigningKey(key)
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("role", String.class);
     }
 }

@@ -73,4 +73,6 @@ public class Product extends BaseTimeEntity {
             company.getProduct().add(this); // 양방향 관계 유지
         }
     }
+
+
 }

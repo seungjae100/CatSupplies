@@ -4,6 +4,7 @@ import com.web.catsupplies.common.jwt.CookieUtils;
 import com.web.catsupplies.common.jwt.JwtTokenProvider;
 import com.web.catsupplies.common.exception.CustomUnauthorizedException;
 import com.web.catsupplies.user.domain.RefreshToken;
+import com.web.catsupplies.user.domain.Role;
 import com.web.catsupplies.user.repository.RefreshTokenRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -20,13 +21,13 @@ public class TokenService {
     private final RefreshTokenRepository refreshTokenRepository;
 
     // AccessToken 생성 ( 쿠키용 )
-    public String createAccessToken(String email) {
-        return jwtTokenProvider.createAccessToken(email);
+    public String createAccessToken(String email, Role role) {
+        return jwtTokenProvider.createAccessToken(email, "ROLE_" + role.name());
     }
 
     // RefreshToken 생성 ( Redis )
-    public String createRefreshToken(String email) {
-        return jwtTokenProvider.createRefreshToken(email);
+    public String createRefreshToken(String email, Role role) {
+        return jwtTokenProvider.createRefreshToken(email, "ROLE_" +role.name());
     }
 
     // RefreshToken 을 Redis 에 저장
@@ -37,7 +38,14 @@ public class TokenService {
 
     // 재발급
     @Transactional
-    public void reAccessToken(HttpServletResponse response, String email) {
+    public void reAccessToken(HttpServletResponse response, String expiredAccessToken) {
+        // 1. 토큰에서 이메일과 역할 꺼내기 (만료된 토큰이어도 괜찮음)
+        String email = jwtTokenProvider.getEmailFromExpiredToken(expiredAccessToken);
+        String roleString = jwtTokenProvider.getRoleFromExpiredToken(expiredAccessToken); // 새로 추가한 메서드 필요
+
+        if (email == null || roleString == null) {
+            throw new CustomUnauthorizedException("토큰 정보가 유효하지 않습니다. 다시 로그인해주세요.");
+        }
         // 저장된 RefreshToken 가져오기
         String storedRefreshToken = getStoredRefreshToken(email);
 
@@ -50,7 +58,8 @@ public class TokenService {
         CookieUtils.deleteCookie(response, "accessToken");
 
         // 새로운 AccessToken 발급
-        String newAccessToken = createAccessToken(email);
+        Role role = Role.valueOf(roleString.replace("ROLE_", ""));
+        String newAccessToken = createAccessToken(email, role);
 
         // 새 AccessToken 을 HttpOnly 쿠키에 저장
         CookieUtils.setCookie(response, "accessToken", newAccessToken, 60 * 60);
