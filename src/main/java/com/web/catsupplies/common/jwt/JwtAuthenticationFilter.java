@@ -1,5 +1,6 @@
 package com.web.catsupplies.common.jwt;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -33,11 +34,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // JWT 유효성 검사
             if (jwtTokenProvider.validateToken(token)) {
-                String email = jwtTokenProvider.getEmail(token);
-                String role = jwtTokenProvider.getRole(token);
+                Claims claims = jwtTokenProvider.getClaimsFromToken(token);
+
 
                 // 이미 인증이 되어있는지 확인 (중복 방지)
-                if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                if (claims != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    String email = claims.getSubject();
+                    String role = claims.get("role", String.class);
+
                     // DB 에서 사용자 정보 조회
                     UserDetails userDetails;
                     if ("ROLE_COMPANY".equals(role)) {

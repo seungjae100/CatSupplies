@@ -74,5 +74,13 @@ public class Product extends BaseTimeEntity {
         }
     }
 
+    // product update 메서드 추가
+    public void update(String name, int price, String imgUrl, String description) {
+        this.name = name;
+        this.price = price;
+        this.imgUrl = imgUrl;
+        this.description = description;
+    }
+
 
 }

@@ -7,6 +7,7 @@ import com.web.catsupplies.product.domain.Stock;
 import com.web.catsupplies.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -32,5 +33,13 @@ public class ProductService {
         Product savedProduct = productRepository.save(product);
 
         return savedProduct.getId();
+    }
+
+    @Transactional
+    public void updateProduct(Long productId, UpdateProductRequest request) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("해당 제품이 존재하지 않습니다."));
+
+        product.update(request.getName(), request.getPrice(), request.getImgUrl(), request.getDescription());
     }
 }
