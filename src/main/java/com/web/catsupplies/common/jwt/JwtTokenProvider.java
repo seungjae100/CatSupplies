@@ -72,50 +72,18 @@ public class JwtTokenProvider {
         return false;
     }
 
-    // JWT 토큰에서 email(사용자 식별 정보)을 추출하는 메서드
-    public String getEmail(String token) {
-        return Jwts.parserBuilder().setSigningKey(key).build()
-                .parseClaimsJws(token).getBody().getSubject(); // subject 에 저장된 email 값 반환
-    }
-
-    // 만료된 AccessToken에서도 email을 추출할 수 있도록 처리 (재발급시 필요)
-    public String getEmailFromExpiredToken(String token) {
+    // Claims를 하나로 꺼내느 메서드 (만료된 토큰 포함)
+    public Claims getClaimsFromToken(String token) {
         try {
             return Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
                     .parseClaimsJws(token)
-                    .getBody()
-                    .getSubject(); // 정상적인 토큰이면 email 반환
-        } catch (ExpiredJwtException e) {
-            return e.getClaims().getSubject(); // 만료된 토큰에서도 email 반환 가능
-        } catch (Exception e) {
-            return null; // 토큰이 손상되었거나 변조된 경우 null 반환
-        }
-    }
-    // 만료된 AccessToken에서도 role을 추출할 수 있도록 처리 (재발급시 필요)
-    public String getRoleFromExpiredToken(String token) {
-        try {
-            return Jwts.parserBuilder()
-                    .setSigningKey(key)
-                    .build()
-                    .parseClaimsJws(token)
-                    .getBody()
-                    .get("role", String.class);
-        } catch (ExpiredJwtException e) {
-            return e.getClaims().get("role", String.class);
-        } catch (Exception e) {
+                    .getBody();
+        } catch (ExpiredJwtException error) {
+            return error.getClaims(); // 만료 됐어도 Claims는 추출 가능
+        } catch (Exception error) {
             return null;
         }
-    }
-
-    // 토큰에서 role 정보를 가져온다.
-    public String getRole(String token) {
-        return Jwts.parserBuilder()
-                .setSigningKey(key)
-                .build()
-                .parseClaimsJws(token)
-                .getBody()
-                .get("role", String.class);
     }
 }

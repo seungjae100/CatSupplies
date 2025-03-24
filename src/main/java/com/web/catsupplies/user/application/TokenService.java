@@ -6,6 +6,7 @@ import com.web.catsupplies.common.exception.CustomUnauthorizedException;
 import com.web.catsupplies.user.domain.RefreshToken;
 import com.web.catsupplies.user.domain.Role;
 import com.web.catsupplies.user.repository.RefreshTokenRepository;
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -39,13 +40,21 @@ public class TokenService {
     // 재발급
     @Transactional
     public void reAccessToken(HttpServletResponse response, String expiredAccessToken) {
-        // 1. 토큰에서 이메일과 역할 꺼내기 (만료된 토큰이어도 괜찮음)
-        String email = jwtTokenProvider.getEmailFromExpiredToken(expiredAccessToken);
-        String roleString = jwtTokenProvider.getRoleFromExpiredToken(expiredAccessToken); // 새로 추가한 메서드 필요
+        // 1. 토큰에서 이메일과 역할 꺼내기
+        Claims claims = jwtTokenProvider.getClaimsFromToken(expiredAccessToken);
 
-        if (email == null || roleString == null) {
+        // 2. null 체크
+        if (claims == null) {
             throw new CustomUnauthorizedException("토큰 정보가 유효하지 않습니다. 다시 로그인해주세요.");
         }
+        // 3. Claims에서 email과 role 꺼내기
+        String email = claims.getSubject(); // subjectsms email로 저장됨
+        String roleString = claims.get("role", String.class);
+
+        if (email == null || roleString == null) {
+            throw new CustomUnauthorizedException("토큰 정보가 누락되었습니다. 다시 로그인해주세요.");
+        }
+
         // 저장된 RefreshToken 가져오기
         String storedRefreshToken = getStoredRefreshToken(email);
 
@@ -88,32 +97,21 @@ public class TokenService {
             return; // 예외 발생 X, 그냥 정상 종료
         }
 
-        String email = null;
+        // Claims 추출
+        Claims claims = jwtTokenProvider.getClaimsFromToken(accessToken);
 
-        // AccessToken 이 유효하면 email 추출
-        if (jwtTokenProvider.validateToken(accessToken)) {
-            jwtTokenProvider.getEmail(accessToken);
-        } else {
-            // AccessToken 이 만료된 경우 email 추출
-            email = jwtTokenProvider.getEmailFromExpiredToken(accessToken);
-
-            if (email != null) { // 이메일이 있으면 RefreshToken 확인
-                String refreshToken = getStoredRefreshToken(email);
-                if (refreshToken != null && validateRefreshToken(refreshToken)) {
-                    reAccessToken(response, email); // AccessToken 재발급 후 로그아웃
-                }
-            }
-
-            // email 이 없으면 RefreshToken 도 없거나 변조된 경우이므로 종료
-            if (email == null) {
-                return;
-            }
-
-            // RefreshToken 삭제 (로그아웃 처리)
-            refreshTokenRepository.deleteById(email);
-
-            // AccessToken 쿠키 삭제
-            CookieUtils.deleteCookie(response, "accessToken");
+        if (claims == null) {
+            return; // 손상된 토큰이거나 유효하지 않음
         }
+
+        String email = claims.getSubject(); // getEmail
+
+        // RefreshToken 조회 및 검증
+        String refreshToken = getStoredRefreshToken(email);
+        if (refreshToken != null && validateRefreshToken(refreshToken)) {
+            refreshTokenRepository.deleteById(email);
+        }
+        // AccessToken 쿠키 삭제
+        CookieUtils.deleteCookie(response, "accessToken");
     }
 }
