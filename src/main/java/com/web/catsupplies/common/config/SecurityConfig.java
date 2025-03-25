@@ -1,5 +1,6 @@
 package com.web.catsupplies.common.config;
 
+import com.web.catsupplies.common.jwt.CompanyDetailsSerevice;
 import com.web.catsupplies.common.jwt.CustomUserDetailsService;
 import com.web.catsupplies.common.jwt.JwtAuthenticationFilter;
 import com.web.catsupplies.common.jwt.JwtTokenProvider;
@@ -20,16 +21,22 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomUserDetailsService userDetailsService; // 직접 만든 UserDetailsService 생성자 주입
+    private final CompanyDetailsSerevice companyDetailsSerevice;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .csrf(csrf -> csrf.disable()) // csrf 비활성화
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/user/register",  "/api/user/login").permitAll()
+                        .requestMatchers("/api/user/register",  "/api/user/login",
+                                        "/api/company/register", "/api/company/login").permitAll()
+                        .requestMatchers("/api/products/", "/api/products/**").hasAnyRole("USER", "COMPANY")
+
+                        .requestMatchers("/api/products/create", "/api/products/update/**", "/api/products/delete").hasRole("COMPANY")
+
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, companyDetailsSerevice), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

@@ -1,5 +1,6 @@
 package com.web.catsupplies.common.jwt;
 
+import io.jsonwebtoken.Claims;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.Cookie;
@@ -20,7 +21,8 @@ import java.io.IOException;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final UserDetailsService userDetailsService; // 사용자 정볼르 가져오는 서비스
+    private final UserDetailsService userDetailsService; // 사용자 정보를 가져오는 서비스
+    private final CompanyDetailsSerevice companyDetailsSerevice;
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
@@ -32,12 +34,21 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // JWT 유효성 검사
             if (jwtTokenProvider.validateToken(token)) {
-                String email = jwtTokenProvider.getEmail(token);
+                Claims claims = jwtTokenProvider.getClaimsFromToken(token);
+
 
                 // 이미 인증이 되어있는지 확인 (중복 방지)
-                if (SecurityContextHolder.getContext().getAuthentication() == null) {
+                if (claims != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+                    String email = claims.getSubject();
+                    String role = claims.get("role", String.class);
+
                     // DB 에서 사용자 정보 조회
-                    UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+                    UserDetails userDetails;
+                    if ("ROLE_COMPANY".equals(role)) {
+                        userDetails = companyDetailsSerevice.loadUserByUsername(email);
+                    } else {
+                        userDetails = userDetailsService.loadUserByUsername(email);
+                    }
 
                     // 인증 객체 생성 및 설정
                     JwtAuthenticationToken authentication = new JwtAuthenticationToken(userDetails, null, userDetails.getAuthorities());

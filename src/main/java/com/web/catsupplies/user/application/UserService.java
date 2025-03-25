@@ -57,8 +57,8 @@ public class UserService {
         }
 
         // JWT 발급
-        String accessToken = tokenService.createAccessToken(user.getEmail());
-        String refreshToken = tokenService.createRefreshToken(user.getEmail());
+        String accessToken = tokenService.createAccessToken(user.getEmail(), user.getRole());
+        String refreshToken = tokenService.createRefreshToken(user.getEmail(), user.getRole());
 
         // RefreshToken 을 Redis 에 저장
         tokenService.RedisSaveRefreshToken(user.getEmail(), refreshToken);
@@ -68,8 +68,9 @@ public class UserService {
     }
 
     // AccessToken 재발급
-    public void reAccessToken(HttpServletResponse response, String email) {
-        tokenService.reAccessToken(response, email);
+    public void reAccessToken(HttpServletRequest request, HttpServletResponse response) {
+        String expiredToken = CookieUtils.getCookie(request, "accessToken");
+        tokenService.reAccessToken(response, expiredToken);
     }
 
     // 로그아웃
