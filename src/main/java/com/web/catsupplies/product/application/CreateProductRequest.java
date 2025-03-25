@@ -28,6 +28,9 @@ public class CreateProductRequest {
     @NotBlank(message = "제품설명을 입력해주세요.")
     private String description;
 
+    @Min(value = 0, message = "재고 수량은 0 이상이여야 합니다.")
+    private Integer stockQuantity;
+
     // DTO -> Entity 변환
     public Product toEntity(Company company, Stock stock) {
         return Product.builder()

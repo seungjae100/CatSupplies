@@ -56,7 +56,7 @@ public class Stock {
     // 재고 증가
     public void increaseStock(int amount) {
         this.quantity += amount;
-        addStockHistory(StockStatus.STOCK_INCREASED, amount);
+        updateStockHistory(StockStatus.STOCK_INCREASED, amount);
     }
 
     // 재고 감소
@@ -65,13 +65,13 @@ public class Stock {
             throw new IllegalArgumentException("재고가 부족합니다.");
         }
         this.quantity -= amount;
-        addStockHistory(StockStatus.STOCK_DECREASED, -amount);
+        updateStockHistory(StockStatus.STOCK_DECREASED, -amount);
     }
 
     // 재고 입고 처리 (입고, 재입고)
     public void inboundStock(int amount) {
         this.quantity += amount;
-        addStockHistory(StockStatus.INBOUND, amount);
+        updateStockHistory(StockStatus.INBOUND, amount);
     }
 
     // 재고 출고 처리
@@ -80,19 +80,36 @@ public class Stock {
             throw new IllegalArgumentException("출고할 재고가 부족합니다.");
         }
         this.quantity -= amount;
-        addStockHistory(StockStatus.OUTBOUND, -amount);
+        updateStockHistory(StockStatus.OUTBOUND, -amount);
     }
 
     // 품절 처리
     public void soldOut() {
         this.quantity = 0;
-        addStockHistory(StockStatus.SOLD_OUT, 0);
+        updateStockHistory(StockStatus.SOLD_OUT, 0);
     }
 
+    // 재고 수량 변경 메서드 (updateRequestDTO)
+    public void updateQuantity(int newQuantity) {
+        int change = newQuantity - this.quantity;
+
+        if (change == 0) return; // 수량 변경이 없으면 종료
+
+        this.quantity = newQuantity;
+
+        // 변화 방향에 따라 상태 변경
+        if (change > 0) {
+            updateStockHistory(StockStatus.STOCK_INCREASED, change);
+        } else {
+            updateStockHistory(StockStatus.STOCK_DECREASED, change);
+        }
+    }
+
+
     // 재고 변경이력을 자동으로 저장
-    private void addStockHistory(StockStatus status, int quantityChange) {
+    private void updateStockHistory(StockStatus status, int quantityChange) {
         StockHistory history = StockHistory.createHistory(this, status, quantityChange);
-        this.stockHistories.add(history);
+        addStockHistory(history);
     }
 
 

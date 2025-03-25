@@ -20,4 +20,7 @@ public class UpdateProductRequest {
     private String imgUrl;
 
     private String description;
+
+    @Min(0)
+    private Integer stockQuantity; // 재고 수량만 따로 받기
 }
