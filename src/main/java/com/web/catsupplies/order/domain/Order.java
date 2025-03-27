@@ -1,5 +1,6 @@
 package com.web.catsupplies.order.domain;
 
+import com.web.catsupplies.user.domain.BaseTimeEntity;
 import com.web.catsupplies.user.domain.User;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
@@ -13,8 +14,8 @@ import java.util.List;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-@Table(name = "order")
-public class Order {
+@Table(name = "orders")
+public class Order extends BaseTimeEntity {
     // 기본키
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
