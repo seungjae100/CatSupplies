@@ -24,6 +24,7 @@ public class OrderService {
     private final UserRepository userRepository;
 
     // 주문하기
+    @Transactional
     public void createOrder(Long userId, OrderCreateRequest request) {
         User user = userRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("유저가 로그인하지 않은 상태입니다."));
@@ -45,6 +46,7 @@ public class OrderService {
     }
 
     // 주문 취소
+    @Transactional
     public void cancelOrder(Long orderId, Long userId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new IllegalArgumentException("주문내역이 없습니다."));
@@ -64,7 +66,7 @@ public class OrderService {
     }
 
     // 주문 목록 조회
-    @Transactional
+    @Transactional(readOnly = true)
     public List<OrderListResponse> getMyOrders(Long userId) {
         List<Order> orders = orderRepository.findByUserId(userId);
 
