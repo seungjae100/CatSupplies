@@ -4,6 +4,8 @@ import com.web.catsupplies.order.domain.Order;
 import com.web.catsupplies.order.domain.OrderItem;
 import com.web.catsupplies.order.domain.OrderStatus;
 import com.web.catsupplies.order.repository.OrderRepository;
+import com.web.catsupplies.payment.domain.Payment;
+import com.web.catsupplies.payment.domain.PaymentStatus;
 import com.web.catsupplies.product.domain.Product;
 import com.web.catsupplies.product.repository.ProductRepository;
 import com.web.catsupplies.user.domain.User;
@@ -41,6 +43,14 @@ public class OrderService {
                 .build();
 
         order.addOrderItem(orderItem);
+
+        Payment payment = Payment.builder()
+                .order(order)
+                .paymentStatus(PaymentStatus.PAID)
+                .amount(order.getTotalPrice())
+                .build();
+
+        order.setPayment(payment);
 
         orderRepository.save(order);
     }
