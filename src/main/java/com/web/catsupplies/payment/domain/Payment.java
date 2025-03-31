@@ -38,12 +38,6 @@ public class Payment {
         this.paidAt = (paymentStatus == PaymentStatus.PAID ? LocalDateTime.now() : null);
     }
 
-    // 결제 성공
-    public void completePayment() {
-        this.paymentStatus = PaymentStatus.PAID;
-        this.paidAt = LocalDateTime.now();
-    }
-
     // Order 연관관계 메서드
     public void setOrder(Order order) {
         this.order = order;
@@ -51,6 +45,19 @@ public class Payment {
             order.setPayment(this);
         }
     }
+
+    // 결제 성공
+    public void completePayment() {
+        this.paymentStatus = PaymentStatus.PAID;
+        this.paidAt = LocalDateTime.now();
+    }
+
+    // 결제 취소
+    public void cancel() {
+        this.paymentStatus = PaymentStatus.FAILED;
+    }
+
+
 
 
 }
