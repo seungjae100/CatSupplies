@@ -1,5 +1,6 @@
 package com.web.catsupplies.order.domain;
 
+import com.web.catsupplies.payment.domain.Payment;
 import com.web.catsupplies.user.domain.BaseTimeEntity;
 import com.web.catsupplies.user.domain.User;
 import jakarta.persistence.*;
@@ -38,9 +39,13 @@ public class Order extends BaseTimeEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
+    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    private Payment payment;
+
     @Builder
-    public Order(User user, OrderStatus orderStatus, int totalPrice) {
+    public Order(User user, Payment payment, OrderStatus orderStatus, int totalPrice) {
         this.user = user;
+        this.payment = payment;
         this.orderStatus = orderStatus;
         this.totalPrice = totalPrice;
         this.orderItems = new ArrayList<>();
@@ -50,6 +55,14 @@ public class Order extends BaseTimeEntity {
     public void addOrderItem(OrderItem item) {
         orderItems.add(item);
         item.setOrder(this);
+    }
+
+    // Payment 연관관계 메서드
+    public void setPayment(Payment payment) {
+        this.payment = payment;
+        if (payment.getOrder() != this) {
+            payment.setOrder(this);
+        }
     }
 
     // 주문 취소
