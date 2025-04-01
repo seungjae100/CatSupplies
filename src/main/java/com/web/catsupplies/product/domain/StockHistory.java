@@ -1,5 +1,6 @@
 package com.web.catsupplies.product.domain;
 
+import com.web.catsupplies.user.domain.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -10,7 +11,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class StockHistory {
+public class StockHistory extends BaseTimeEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -18,9 +19,6 @@ public class StockHistory {
 
     @Column(nullable = false)
     private int quantityChange;
-
-    @Column(nullable = false)
-    private LocalDateTime updatedAt;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)

@@ -1,6 +1,7 @@
 package com.web.catsupplies.payment.domain;
 
 import com.web.catsupplies.order.domain.Order;
+import com.web.catsupplies.user.domain.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -11,7 +12,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(name = "payments")
-public class Payment {
+public class Payment extends BaseTimeEntity {
 
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
