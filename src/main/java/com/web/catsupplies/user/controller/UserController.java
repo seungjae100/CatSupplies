@@ -1,6 +1,9 @@
 package com.web.catsupplies.user.controller;
 
 import com.web.catsupplies.user.application.*;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
@@ -11,7 +14,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+@Tag(name = "User", description = "사용자 관련 API")
 @RestController
 @RequestMapping("/api/user")
 @RequiredArgsConstructor
@@ -20,6 +23,11 @@ public class UserController {
     private final UserService userService;
 
     // 회원가입
+    @Operation(
+            summary = "회원가입",
+            description = "JWT 없이 사용가능",
+            security = @SecurityRequirement(name = "") // JWT 인증 제외
+    )
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody @Valid RegisterRequest request) {
         userService.register(request);
@@ -27,6 +35,11 @@ public class UserController {
     }
 
     // 로그인
+    @Operation(
+            summary = "로그인",
+            description = "JWT 없이 사용가능",
+            security = @SecurityRequirement(name = "") // JWT 인증 제외
+    )
     @PostMapping("/login")
     public ResponseEntity<String> login(@RequestBody @Valid LoginRequest request, HttpServletResponse response) {
         userService.login(request, response); // 사용자 정보 가져오기
@@ -34,6 +47,11 @@ public class UserController {
     }
 
     // 로그아웃
+    @Operation(
+            summary = "로그아웃",
+            description = "JWT",
+            security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
+    )
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletResponse response, HttpServletRequest request) {
         userService.logout(request, response);
@@ -41,6 +59,11 @@ public class UserController {
     }
 
     // 재발급토큰
+    @Operation(
+            summary = "AccessToken 재발급",
+            description = "JWT",
+            security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
+    )
     @PostMapping("/reAccessToken")
     public ResponseEntity<String> reAccessToken(HttpServletRequest request, HttpServletResponse response) {
         userService.reAccessToken(request, response);

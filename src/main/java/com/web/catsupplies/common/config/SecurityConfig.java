@@ -28,12 +28,24 @@ public class SecurityConfig {
         return http
                 .csrf(csrf -> csrf.disable()) // csrf 비활성화
                 .authorizeHttpRequests(auth -> auth
+                        //Swagger 접근 허용
+                        .requestMatchers(
+                                "/swagger-ui/**",
+                                "/swagger-ui.html",
+                                "/v3/api-docs/**",
+                                "/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+                        ).permitAll()
+                        // 공개 API
                         .requestMatchers("/api/user/register",  "/api/user/login",
                                         "/api/company/register", "/api/company/login").permitAll()
-                        .requestMatchers("/api/products/", "/api/products/**").hasAnyRole("USER", "COMPANY")
 
+                        // 권한 제어
+                        .requestMatchers("/api/products/", "/api/products/**").hasAnyRole("USER", "COMPANY")
                         .requestMatchers("/api/products/create", "/api/products/update/**", "/api/products/delete").hasRole("COMPANY")
 
+                        // 그 외는 인증필요
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, companyDetailsSerevice), UsernamePasswordAuthenticationFilter.class)
