@@ -42,7 +42,6 @@ public class StockHistory extends BaseTimeEntity {
                 .stock(stock)
                 .stockStatus(status)
                 .quantityChange(quantityChange)
-                .updatedAt(LocalDateTime.now())
                 .build();
     }
 }

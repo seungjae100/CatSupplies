@@ -5,6 +5,9 @@ import com.web.catsupplies.product.application.CreateProductRequest;
 import com.web.catsupplies.product.application.ProductListResponse;
 import com.web.catsupplies.product.application.ProductService;
 import com.web.catsupplies.product.application.UpdateProductRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -14,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Map;
 
+@Tag(name = "Product", description = "제품 관련 API")
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/products")
@@ -22,6 +26,11 @@ public class ProductController {
     private final ProductService productService;
 
     // 제품 등록 메서드
+    @Operation(
+            summary = "제품등록",
+            description = "JWT 인증필요, 기업 제품 등록 가능, 사용자 불가",
+            security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
+    )
     @PostMapping("/create")
     public ResponseEntity<?> createProduct(@RequestBody @Valid CreateProductRequest request,
                                            @AuthenticationPrincipal CompanyDetails companyDetails) {
@@ -31,6 +40,11 @@ public class ProductController {
     }
 
     // 제품 수정 메서드
+    @Operation(
+            summary = "제품수정",
+            description = "JWT 인증필요, 기업 제품 수정 가능, 사용자 불가",
+            security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
+    )
     @PutMapping("/{productId}")
     public ResponseEntity<?> updateProduct(@RequestBody @Valid UpdateProductRequest request,
                                            @PathVariable Long productId,
@@ -41,6 +55,11 @@ public class ProductController {
     }
 
     // 제품 삭제
+    @Operation(
+            summary = "제품삭제",
+            description = "JWT 인증필요, 기업 제품 삭제 가능, 사용자 불가",
+            security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
+    )
     @DeleteMapping("/{productId}")
     public ResponseEntity<?> deleteProduct(@PathVariable Long productId,
                                            @AuthenticationPrincipal CompanyDetails companyDetails) {
@@ -50,6 +69,11 @@ public class ProductController {
     }
 
     // 제품 목록 조회
+    @Operation(
+            summary = "제품목록조회",
+            description = "JWT 인증필요, 기업 제품 목록 조회 가능, 사용자 조회 가능(홈페이지)",
+            security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
+    )
     @GetMapping("/List")
     public ResponseEntity<List<ProductListResponse>> getProductsByCompany(@AuthenticationPrincipal CompanyDetails companyDetails) {
         Long companyId = companyDetails.getCompanyId();
