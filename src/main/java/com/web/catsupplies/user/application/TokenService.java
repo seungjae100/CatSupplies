@@ -2,7 +2,6 @@ package com.web.catsupplies.user.application;
 
 import com.web.catsupplies.common.jwt.CookieUtils;
 import com.web.catsupplies.common.jwt.JwtTokenProvider;
-import com.web.catsupplies.common.exception.CustomUnauthorizedException;
 import com.web.catsupplies.user.domain.RefreshToken;
 import com.web.catsupplies.user.domain.Role;
 import com.web.catsupplies.user.repository.RefreshTokenRepository;
@@ -45,14 +44,14 @@ public class TokenService {
 
         // 2. null 체크
         if (claims == null) {
-            throw new CustomUnauthorizedException("토큰 정보가 유효하지 않습니다. 다시 로그인해주세요.");
+            throw new IllegalArgumentException("토큰 정보가 유효하지 않습니다. 다시 로그인해주세요.");
         }
         // 3. Claims에서 email과 role 꺼내기
         String email = claims.getSubject(); // subjectsms email로 저장됨
         String roleString = claims.get("role", String.class);
 
         if (email == null || roleString == null) {
-            throw new CustomUnauthorizedException("토큰 정보가 누락되었습니다. 다시 로그인해주세요.");
+            throw new IllegalArgumentException("토큰 정보가 누락되었습니다. 다시 로그인해주세요.");
         }
 
         // 저장된 RefreshToken 가져오기
@@ -60,7 +59,7 @@ public class TokenService {
 
         // RefreshToken 이 없거나 유효하지 않으면 예외 발생
         if (storedRefreshToken == null || !validateRefreshToken(storedRefreshToken)) {
-            throw new CustomUnauthorizedException("RefreshToken 이 유효하지 않습니다. 다시 로그인해주세요.");
+            throw new IllegalArgumentException("RefreshToken 이 유효하지 않습니다. 다시 로그인해주세요.");
         }
 
         // 기존 만료된 AccessToken 삭제

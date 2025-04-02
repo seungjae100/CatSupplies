@@ -29,7 +29,7 @@ public class OrderService {
     @Transactional
     public void createOrder(Long userId, OrderCreateRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저가 로그인하지 않은 상태입니다."));
+                .orElseThrow(() -> new UnauthenticatedException("유저가 로그인하지 않은 상태입니다."));
 
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new IllegalArgumentException("제품이 존재하지 않습니다."));
