@@ -74,7 +74,7 @@ public class ProductController {
             description = "JWT 인증필요, 기업 제품 목록 조회 가능, 사용자 조회 가능(홈페이지)",
             security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
     )
-    @GetMapping("/List")
+    @GetMapping("/list")
     public ResponseEntity<List<ProductListResponse>> getProductsByCompany(@AuthenticationPrincipal CompanyDetails companyDetails) {
         Long companyId = companyDetails.getCompanyId();
         List<ProductListResponse> products = productService.getProductsByCompany(companyId);

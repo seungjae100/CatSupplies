@@ -58,7 +58,7 @@ public class PaymentController {
             description = "JWT 인증필요, 사용자 결제내역  확인가능",
             security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
     )
-    @GetMapping("/my")
+    @GetMapping("/list")
     public ResponseEntity<List<PaymentResponse>> getMyPayment(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getUserId();
 
