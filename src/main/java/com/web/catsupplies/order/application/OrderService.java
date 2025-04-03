@@ -1,5 +1,6 @@
 package com.web.catsupplies.order.application;
 
+import com.web.catsupplies.common.exception.UnauthenticatedException;
 import com.web.catsupplies.order.domain.Order;
 import com.web.catsupplies.order.domain.OrderItem;
 import com.web.catsupplies.order.domain.OrderStatus;
