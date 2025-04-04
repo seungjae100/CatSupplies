@@ -59,7 +59,7 @@ public class OrderController {
             description = "JWT",
             security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
     )
-    @GetMapping("/my")
+    @GetMapping("/list")
     public ResponseEntity<?> getMyOrders(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getUserId();
         List<OrderListResponse> response = orderService.getMyOrders(userId);

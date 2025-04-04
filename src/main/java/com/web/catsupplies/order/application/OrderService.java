@@ -1,5 +1,6 @@
 package com.web.catsupplies.order.application;
 
+import com.web.catsupplies.common.exception.UnauthenticatedException;
 import com.web.catsupplies.order.domain.Order;
 import com.web.catsupplies.order.domain.OrderItem;
 import com.web.catsupplies.order.domain.OrderStatus;
@@ -29,7 +30,7 @@ public class OrderService {
     @Transactional
     public void createOrder(Long userId, OrderCreateRequest request) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new IllegalArgumentException("유저가 로그인하지 않은 상태입니다."));
+                .orElseThrow(() -> new UnauthenticatedException("유저가 로그인하지 않은 상태입니다."));
 
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new IllegalArgumentException("제품이 존재하지 않습니다."));
