@@ -45,7 +45,7 @@ public class CompanyService {
     // 로그인
     public void login(CompanyLoginRequest request, HttpServletResponse response) {
 
-        Company company = companyRepository.findByEmailAndDeleltedFalse(request.getEmail())
+        Company company = companyRepository.findByEmailAndDeletedFalse(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("잘못된 이메일입니다."));
         // 비밀번호 검증 ( 클라이언트에서 요청이 온 비밀번호와 유저의 DB 에서 가져온 비밀번호를 비교했는데 다르다면)
         if (!passwordEncoder.matches(request.getPassword(), company.getPassword())) {
@@ -66,7 +66,7 @@ public class CompanyService {
     // 정보 수정
     public void modify(CompanyModifyRequest request, Long companyId, Long loginCompanyId) {
         // 로그인한 본인 기업인지 확인
-        if (companyId.equals(loginCompanyId)) {
+        if (!companyId.equals(loginCompanyId)) {
             throw new AccessDeniedException("로그인한 기업만이 수정할 수 있습니다.");
         }
         // 데이터베이스에 기록이 있는 기업정보인지 확인

@@ -11,7 +11,7 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     boolean existsByEmailAndDeletedFalse(String email); // 중복되는 이메일 확인
 
     // 로그인, 기업 정보 조회 탈퇴된 회원은 제외하고
-    Optional<Company> findByEmailAndDeleltedFalse(String email);
+    Optional<Company> findByEmailAndDeletedFalse(String email);
 
     // 기업 ID 로 조회 탈퇴한 회원은 제외하고
     Optional<Company> finByIdAndDeletedFalse(Long id);
