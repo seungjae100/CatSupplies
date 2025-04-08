@@ -1,5 +1,7 @@
 package com.web.catsupplies.company.application;
 
+import com.web.catsupplies.common.exception.AccessDeniedException;
+import com.web.catsupplies.common.exception.NotFoundException;
 import com.web.catsupplies.common.jwt.CookieUtils;
 import com.web.catsupplies.common.jwt.JwtTokenProvider;
 import com.web.catsupplies.company.domain.Company;
@@ -56,6 +58,42 @@ public class CompanyService {
 
         CookieUtils.setCookie(response, "accessToken", accessToken, 60 * 60);
 
+    }
+
+    // 정보 수정
+    public void modify(CompanyModifyRequest request, Long companyId, Long loginCompanyId) {
+        // 로그인한 본인 기업인지 확인
+        if (companyId.equals(loginCompanyId)) {
+            throw new AccessDeniedException("로그인한 기업만이 수정할 수 있습니다.");
+        }
+        // 데이터베이스에 기록이 있는 기업정보인지 확인
+        Company company = companyRepository.findById(companyId)
+                .orElseThrow(() -> new NotFoundException("없는 기업입니다."));
+
+        // 정보 부분 수정
+        if (request.getPassword() != null) {
+            company.changePassword(request.getPassword());
+        }
+
+        if (request.getPhone() != null) {
+            company.changePhone(request.getPhone());
+        }
+
+        if (request.getAddress() != null) {
+            company.changeAddress(request.getAddress());
+        }
+
+        if (request.getCompanyName() != null) {
+            company.changeCompanyName(request.getCompanyName());
+        }
+
+        if (request.getBoss() != null) {
+            company.changeBoss(request.getBoss());
+        }
+
+        if (request.getLicenseNumber() != null) {
+            company.changelicenseNumber(request.getLicenseNumber());
+        }
     }
 
     // AccessToken 재발급
