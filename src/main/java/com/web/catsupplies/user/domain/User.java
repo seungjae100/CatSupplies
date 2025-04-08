@@ -44,6 +44,7 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private Role role = Role.USER;
 
+    // 삭제
     @Column(nullable = false)
     private boolean deleted = false;
 

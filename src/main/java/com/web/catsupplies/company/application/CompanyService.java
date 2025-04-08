@@ -25,7 +25,7 @@ public class CompanyService {
 
     // 회원가입
     public void register(CompanyRegisterRequest request) {
-        if (companyRepository.existsByEmail(request.getEmail())) {
+        if (companyRepository.existsByEmailAndDeletedFalse(request.getEmail())) {
             throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
         }
 
@@ -44,18 +44,21 @@ public class CompanyService {
 
     // 로그인
     public void login(CompanyLoginRequest request, HttpServletResponse response) {
-        Company company = companyRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new IllegalArgumentException("잘못된 이메일입니다."));
 
+        Company company = companyRepository.findByEmailAndDeleltedFalse(request.getEmail())
+                .orElseThrow(() -> new IllegalArgumentException("잘못된 이메일입니다."));
+        // 비밀번호 검증 ( 클라이언트에서 요청이 온 비밀번호와 유저의 DB 에서 가져온 비밀번호를 비교했는데 다르다면)
         if (!passwordEncoder.matches(request.getPassword(), company.getPassword())) {
             throw new IllegalArgumentException("잘못된 비밀번호입니다.");
         }
 
+        // JWT 발급
         String accessToken = jwtTokenProvider.createAccessToken(company.getEmail(), Role.COMPANY.name());
         String refreshToken = jwtTokenProvider.createRefreshToken(company.getEmail(), Role.COMPANY.name());
 
+        // RefreshToken 을 Redis 에 저장
         tokenService.RedisSaveRefreshToken(company.getEmail(), refreshToken);
-
+        // AccessToken HttpOnly 쿠키에 저장
         CookieUtils.setCookie(response, "accessToken", accessToken, 60 * 60);
 
     }
@@ -67,7 +70,7 @@ public class CompanyService {
             throw new AccessDeniedException("로그인한 기업만이 수정할 수 있습니다.");
         }
         // 데이터베이스에 기록이 있는 기업정보인지 확인
-        Company company = companyRepository.findById(companyId)
+        Company company = companyRepository.finByIdAndDeletedFalse(companyId)
                 .orElseThrow(() -> new NotFoundException("없는 기업입니다."));
 
         // 정보 부분 수정
@@ -105,6 +108,21 @@ public class CompanyService {
     // 로그아웃
     public void logout(HttpServletResponse response, HttpServletRequest request) {
         tokenService.logout(request, response);
+    }
+
+    // 기업 탈퇴
+    public void deleteCompany(Long CompanyId) {
+
+        // 기업 정보가 데이터베이스에 저장되어 있는지 확인
+        Company company = companyRepository.finByIdAndDeletedFalse(CompanyId)
+                .orElseThrow(() -> new NotFoundException("기업정보가 존재하지 않습니다."));
+
+        // 이미 기업이 탈퇴한 상황
+        if (company.isDeleted()) {
+            throw new IllegalArgumentException("이미 탈퇴한 기업입니다.");
+        }
+
+        company.remove();
     }
 
 

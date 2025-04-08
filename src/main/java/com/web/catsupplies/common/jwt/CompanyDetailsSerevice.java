@@ -16,7 +16,7 @@ public class CompanyDetailsSerevice implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Company company = companyRepository.findByEmail(email)
+        Company company = companyRepository.findByEmailAndDeleltedFalse(email)
                 .orElseThrow(() -> new UsernameNotFoundException("회사를 찾을 수 없습니다"));
 
         return new CompanyDetails(company);

@@ -49,12 +49,16 @@ public class Company extends BaseTimeEntity {
     @Column(nullable = false, unique = true)
     private String licenseNumber;
 
+    // 삭제처리
+    @Column(nullable = false)
+    private boolean deleted = false;
+
     // 권한
     @Enumerated(EnumType.STRING)
     private Role role = Role.COMPANY;
 
     // 회사와 제품의 연관매핑
-    @OneToMany(mappedBy = "company", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "company")
     private List<Product> product = new ArrayList<>();
 
     @Builder
@@ -105,11 +109,13 @@ public class Company extends BaseTimeEntity {
         this.licenseNumber = licenseNumber;
     }
 
-    // 제품 삭제
-    public void removeProduct(Product product) {
-        this.product.remove(product);
-        if (product.getCompany() == this) {
-            product.setCompany(null); // 관계 해제
-        }
+    // 기업 삭제 메서드
+    public void remove() {
+        this.deleted = true;
     }
+
+    public boolean isDeleted() {
+        return deleted;
+    }
+
 }
