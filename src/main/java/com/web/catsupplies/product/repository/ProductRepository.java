@@ -11,4 +11,7 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
 
     // (회사) 내가 등록한 회사 제품 조회 (회사 기본키)
     List<Product> findAllByCompanyId(Long companyId);
+
+    // 중복되는 제품코드가 있는지 조회
+    boolean existsByProductCode(String code);
 }

@@ -12,6 +12,8 @@ import lombok.NoArgsConstructor;
 @JsonInclude(JsonInclude.Include.NON_NULL) // null값은 무시된다.
 public class UpdateProductRequest {
 
+    private String code;
+
     private String name;
 
     @Min(value = 100)

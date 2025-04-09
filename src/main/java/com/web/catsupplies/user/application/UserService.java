@@ -30,20 +30,20 @@ public class UserService {
 
     // 회원가입
     public void register(RegisterRequest request) {
+
         // 이메일 중복 확인
         if (userRepository.existsByEmailAndDeletedFalse(request.getEmail())) {
             throw new IllegalArgumentException("이미 사용 중인 이메일입니다.");
         }
 
         // Builder 를 통한 데이터 요청입력
-        User user = User.builder()
-                .email(request.getEmail())
-                .name(request.getName())
-                .password(passwordEncoder.encode(request.getPassword())) // 비밀번호 암호화
-                .phone(request.getPhone())
-                .address(request.getAddress())
-                .role(Role.USER)
-                .build();
+        User user = User.create(
+                request.getEmail(),
+                request.getName(),
+                passwordEncoder.encode(request.getPassword()),
+                request.getPhone(),
+                request.getAddress()
+        );
 
         // 요청 DB에 저장
         userRepository.save(user);
@@ -124,6 +124,4 @@ public class UserService {
 
         user.remove();
     }
-
-
 }

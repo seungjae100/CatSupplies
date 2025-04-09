@@ -12,6 +12,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(name = "companies")
@@ -49,29 +50,14 @@ public class Company extends BaseTimeEntity {
     @Column(nullable = false, unique = true)
     private String licenseNumber;
 
-    // 삭제처리
-    @Column(nullable = false)
-    private boolean deleted = false;
-
     // 권한
     @Enumerated(EnumType.STRING)
     private Role role = Role.COMPANY;
 
     // 회사와 제품의 연관매핑
-    @OneToMany(mappedBy = "company")
+    @OneToMany(mappedBy = "company", fetch = FetchType.LAZY)
     private List<Product> product = new ArrayList<>();
 
-    @Builder
-    public Company(String email, String password, String phone, String address, String companyName, String boss, String licenseNumber) {
-        this.email = email;
-        this.password = password;
-        this.phone = phone;
-        this.address = address;
-        this.companyName = companyName;
-        this.boss = boss;
-        this.licenseNumber = licenseNumber;
-        this.product = new ArrayList<>();
-    }
 
     // Product: 연관관계 편의 메서드 추가
     public void addProduct(Product product) {
@@ -79,6 +65,20 @@ public class Company extends BaseTimeEntity {
         if (product.getCompany() != this) {
             product.setCompany(this);
         }
+    }
+
+    // 생성
+    public static Company create(String email, String password, String phone, String address,
+                                 String companyName, String boss, String licenseNumber) {
+        return Company.builder()
+                .email(email)
+                .password(password)
+                .phone(phone)
+                .address(address)
+                .companyName(companyName)
+                .boss(boss)
+                .licenseNumber(licenseNumber)
+                .build();
     }
 
     // 정보 수정에 필요한 메서드
@@ -101,7 +101,7 @@ public class Company extends BaseTimeEntity {
         this.companyName = companyName;
     }
 
-    public void changeBoss(String Boss) {
+    public void changeBoss(String boss) {
         this.boss = boss;
     }
 
@@ -110,6 +110,9 @@ public class Company extends BaseTimeEntity {
     }
 
     // 기업 삭제 메서드
+    @Column(nullable = false)
+    private boolean deleted = false;
+
     public void remove() {
         this.deleted = true;
     }

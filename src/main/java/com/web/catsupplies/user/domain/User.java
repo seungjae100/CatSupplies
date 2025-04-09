@@ -12,6 +12,7 @@ import java.util.List;
 @Getter // 모든 필드를 Getter를 자동 생성, Setter를 하지 않은 이유는 불변성을 유지하기 위해서
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor // 모든 필드를 매개변수로 갖는 생성자 자동 생성
+@Builder
 @Table(name = "users") // 엔티티와 매핑될 테이블 이름을 USERS 로 지정, 예약어인 user를 피하기 위해서
 public class User extends BaseTimeEntity {
 
@@ -44,26 +45,24 @@ public class User extends BaseTimeEntity {
     @Column(nullable = false)
     private Role role = Role.USER;
 
-    // 삭제
-    @Column(nullable = false)
-    private boolean deleted = false;
-
-    // Builder 패턴을 통해서 객체를 생성할 시 필드 값을 명확하게 지정
-    @Builder
-    public User(String email, String name, String password, String phone, String address, Role role) {
-        this.email = email;
-        this.name = name;
-        this.password = password;
-        this.phone = phone;
-        this.address = address;
-        this.role = role;
-    }
-
     // Order와 연관관계
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     private List<Order> orders = new ArrayList<>();
 
-    // 정보 수정에 필요한 메서드
+
+    // 회원 생성
+    public static User create(String email, String name, String password,String phone, String address) {
+        return User.builder()
+                .email(email)
+                .name(name)
+                .password(password)
+                .phone(phone)
+                .address(address)
+                .role(Role.USER)
+                .build();
+    }
+
+    // 회원 수정에 필요한 메서드
     public void changeName(String name) {
         this.name = name;
     }
@@ -83,7 +82,10 @@ public class User extends BaseTimeEntity {
         this.address = address;
     }
 
-    // 유저 삭제 메서드
+    // 회원 삭제
+    @Column(nullable = false)
+    private boolean deleted = false;
+
     public void remove() {
         this.deleted = true;
     }
@@ -91,6 +93,8 @@ public class User extends BaseTimeEntity {
     public boolean isDeleted() {
         return deleted;
     }
+
+
 
 
 }

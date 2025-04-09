@@ -1,10 +1,12 @@
 package com.web.catsupplies.company.application;
 
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 @Getter
 @NoArgsConstructor
+@AllArgsConstructor
 public class CompanyModifyRequest {
 
     private String password;

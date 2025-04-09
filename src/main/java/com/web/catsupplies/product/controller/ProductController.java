@@ -1,10 +1,7 @@
 package com.web.catsupplies.product.controller;
 
 import com.web.catsupplies.common.jwt.CompanyDetails;
-import com.web.catsupplies.product.application.CreateProductRequest;
-import com.web.catsupplies.product.application.ProductListResponse;
-import com.web.catsupplies.product.application.ProductService;
-import com.web.catsupplies.product.application.UpdateProductRequest;
+import com.web.catsupplies.product.application.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -79,6 +76,18 @@ public class ProductController {
         Long companyId = companyDetails.getCompanyId();
         List<ProductListResponse> products = productService.getProductsByCompany(companyId);
         return ResponseEntity.ok(products);
+    }
+
+    // 제품 상세 조회
+    @Operation(
+            summary = "제품상세조회",
+            description = "JWT 인증필요, 기업 제품 상세 조회 가능, 사용자 조회 가능(홈페이지)    ",
+            security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
+    )
+    @GetMapping("/list/{productId}")
+    public ResponseEntity<ProductDetailResponse> getProductDetail(@PathVariable Long productId) {
+        ProductDetailResponse response = productService.getProductDetail(productId);
+        return ResponseEntity.ok(response);
     }
 
 

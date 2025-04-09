@@ -29,15 +29,15 @@ public class CompanyService {
             throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
         }
 
-        Company company = Company.builder()
-                .email(request.getEmail())
-                .password(passwordEncoder.encode(request.getPassword()))
-                .phone(request.getPhone())
-                .address(request.getAddress())
-                .companyName(request.getCompanyName())
-                .boss(request.getBoss())
-                .licenseNumber(request.getLicenseNumber())
-                .build();
+        Company company = Company.create(
+                request.getEmail(),
+                request.getPassword(),
+                request.getPhone(),
+                request.getAddress(),
+                request.getCompanyName(),
+                request.getBoss(),
+                request.getLicenseNumber()
+        );
 
         companyRepository.save(company);
     }
@@ -124,7 +124,4 @@ public class CompanyService {
 
         company.remove();
     }
-
-
-
 }

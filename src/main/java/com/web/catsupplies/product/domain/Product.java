@@ -12,31 +12,31 @@ import lombok.*;
 @Table(name = "product")
 public class Product extends BaseTimeEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id; // 기본키
 
     @Column(nullable = false, unique = true)
-    private String code;
+    private String code; // 제품코드
 
     @Column(nullable = false)
-    private String name;
+    private String name; // 제픔이름
 
     @Column(nullable = false)
-    private int price;
+    private int price; // 제품가격
 
     @Column(nullable = false)
-    private String imgUrl;
+    private String imgUrl; // 제품 이미지
 
     @Column(nullable = false)
-    private String description;
+    private String description; // 제품 설명
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
-    private Company company;
+    private Company company; // 기업과의 조인관계 (기업 1 : N 제품)
 
     @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Stock stock;
+    private Stock stock; // 재고와의 조인관계 (재고 1 : 1 제품)
 
     @Builder
     public Product(String code, String name, int price, String imgUrl, String description, Company company, Stock stock) {
@@ -75,11 +75,12 @@ public class Product extends BaseTimeEntity {
     }
 
     // product update 메서드 추가
-    public void update(String name, int price, String imgUrl, String description) {
-        this.name = name;
-        this.price = price;
-        this.imgUrl = imgUrl;
-        this.description = description;
+    public void update(String code, String name, Integer price, String imgUrl, String description) {
+        if (code != null) this.code = code;
+        if (name != null) this.name = name;
+        if (price != null) this.price = price;
+        if (imgUrl != null) this.imgUrl = imgUrl;
+        if (description != null) this.description = description;
     }
 
 

@@ -1,5 +1,6 @@
 package com.web.catsupplies.product.application;
 
+import com.web.catsupplies.common.exception.NotFoundException;
 import com.web.catsupplies.company.domain.Company;
 import com.web.catsupplies.company.repository.CompanyRepository;
 import com.web.catsupplies.product.domain.Product;
@@ -50,7 +51,14 @@ public class ProductService {
             throw new SecurityException("해당 제품을 수정할 권한이 없습니다.");
         }
 
+        if (request.getCode() != null && !request.getCode().equals(product.getCode())) {
+            if (productRepository.existsByProductCode(request.getCode())) {
+                throw new IllegalArgumentException("이미 존재하는 제품코드입니다.");
+            }
+        }
+
         product.update(
+                request.getCode(),
                 request.getName(),
                 request.getPrice(),
                 request.getImgUrl(),
@@ -84,5 +92,13 @@ public class ProductService {
         return products.stream()
                 .map(ProductListResponse::from)
                 .collect(Collectors.toList());
+    }
+
+    // 등록한 제품 상세조회
+    public ProductDetailResponse getProductDetail(Long productId) {
+        Product product = productRepository.findById(productId)
+                .orElseThrow(() -> new NotFoundException("해당 제품이 존재하지 않습니다."));
+
+        return ProductDetailResponse.fromEntity(product);
     }
 }
