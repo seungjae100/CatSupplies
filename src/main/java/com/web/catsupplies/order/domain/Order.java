@@ -14,6 +14,7 @@ import java.util.List;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(name = "orders")
@@ -39,17 +40,10 @@ public class Order extends BaseTimeEntity {
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
+    // 결제와의 조인 메서드
     @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
     private Payment payment;
 
-    @Builder
-    public Order(User user, Payment payment, OrderStatus orderStatus, int totalPrice) {
-        this.user = user;
-        this.payment = payment;
-        this.orderStatus = orderStatus;
-        this.totalPrice = totalPrice;
-        this.orderItems = new ArrayList<>();
-    }
 
     // 연관관계 메서드
     public void addOrderItem(OrderItem item) {

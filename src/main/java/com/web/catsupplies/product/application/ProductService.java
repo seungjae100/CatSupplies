@@ -22,37 +22,38 @@ public class ProductService {
 
     public Long createProduct(Long companyId, CreateProductRequest request) {
         // 로그인한 기업의 정보를 가져온다.
-        Company company = companyRepository.findById(companyId)
+        Company company = companyRepository.findByIdAndDeletedFalse(companyId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 기업을 찾을 수 없습니다."));
 
         // 재고 수량 null 이면 0으로 표시
         int quantity = request.getStockQuantity() != null ? request.getStockQuantity() : 0;
+        Stock stock = Stock.create(quantity);
 
-        Stock stock = Stock.builder()
-                .quantity(quantity)
-                .build();
-
-        // DTO -> 엔티티 변환 후 데이터베이스에 저장
-        Product product = request.toEntity(company, stock);
-
-        // 제품 등록 저장
-        Product savedProduct = productRepository.save(product);
-
-        return savedProduct.getId();
+        Product product = Product.create(
+                request.getCode(),
+                request.getName(),
+                request.getPrice(),
+                request.getImgUrl(),
+                request.getDescription(),
+                company,
+                stock
+        );
+        return productRepository.save(product).getId();
     }
 
     // 제품 수정
     @Transactional
     public void updateProduct(Long productId, UpdateProductRequest request, Long companyId) {
-        Product product = productRepository.findById(productId)
+        // 데이터베이스에 제품이 존재하는지 확인 (Id) 기준
+        Product product = productRepository.findByIdAndDeletedFalse(productId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 제품이 존재하지 않습니다."));
-
+        // 기업 로그인으로 본인인지 확인
         if (!product.getCompany().getId().equals(companyId)) {
             throw new SecurityException("해당 제품을 수정할 권한이 없습니다.");
         }
-
+        // 수정 시 제품코드 중복확인
         if (request.getCode() != null && !request.getCode().equals(product.getCode())) {
-            if (productRepository.existsByProductCode(request.getCode())) {
+            if (productRepository.existsByCodeAndDeletedFalse(request.getCode())) {
                 throw new IllegalArgumentException("이미 존재하는 제품코드입니다.");
             }
         }
@@ -65,6 +66,7 @@ public class ProductService {
                 request.getDescription()
         );
 
+        // 재고수량을 입력하지 않을 시 기존의 재고수량으로 진행
         if (request.getStockQuantity() != null) {
             product.getStock().updateQuantity(request.getStockQuantity());
         }
@@ -73,10 +75,10 @@ public class ProductService {
     // 제품 삭제
     @Transactional
     public void deleteProduct(Long productId, Long companyId) {
-        // 1. 제품이 존재하는지 확인
-        Product product = productRepository.findById(productId)
+        // 제품이 존재하는지 확인
+        Product product = productRepository.findByIdAndDeletedFalse(productId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 제품이 존재하지 않습니다."));
-        // 2. 해당 제품을 등록한 본인 회사인지 비교하여 확인
+        // 해당 제품을 등록한 본인 회사인지 비교하여 확인
         if (!product.getCompany().getId().equals(companyId)) {
             throw new SecurityException("해당 제품을 삭제할 권한이 없습니다.");
         }
@@ -87,7 +89,7 @@ public class ProductService {
     // 내가 등록한 제품 조회
     @Transactional
     public List<ProductListResponse> getProductsByCompany(Long companyId) {
-        List<Product> products = productRepository.findAllByCompanyId(companyId);
+        List<Product> products = productRepository.findAllByCompanyIdAndDeletedFalse(companyId);
 
         return products.stream()
                 .map(ProductListResponse::from)
@@ -96,7 +98,7 @@ public class ProductService {
 
     // 등록한 제품 상세조회
     public ProductDetailResponse getProductDetail(Long productId) {
-        Product product = productRepository.findById(productId)
+        Product product = productRepository.findByIdAndDeletedFalse(productId)
                 .orElseThrow(() -> new NotFoundException("해당 제품이 존재하지 않습니다."));
 
         return ProductDetailResponse.fromEntity(product);

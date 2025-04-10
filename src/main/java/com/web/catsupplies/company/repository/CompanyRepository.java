@@ -14,5 +14,5 @@ public interface CompanyRepository extends JpaRepository<Company, Long> {
     Optional<Company> findByEmailAndDeletedFalse(String email);
 
     // 기업 ID 로 조회 탈퇴한 회원은 제외하고
-    Optional<Company> finByIdAndDeletedFalse(Long id);
+    Optional<Company> findByIdAndDeletedFalse(Long id);
 }

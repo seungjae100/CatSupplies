@@ -42,7 +42,7 @@ public class ProductController {
             description = "JWT 인증필요, 기업 제품 수정 가능, 사용자 불가",
             security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
     )
-    @PutMapping("/{productId}")
+    @PatchMapping("/{productId}")
     public ResponseEntity<?> updateProduct(@RequestBody @Valid UpdateProductRequest request,
                                            @PathVariable Long productId,
                                            @AuthenticationPrincipal CompanyDetails companyDetails) {

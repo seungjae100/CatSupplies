@@ -9,34 +9,24 @@ import java.util.List;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 public class Stock extends BaseTimeEntity {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id; // 기본키
 
     @Column(nullable = false)
-    private int quantity;
+    private int quantity; // 수량
 
     @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    private Product product; // 제품과의 1 : 1 조인
 
     @OneToMany(mappedBy = "stock", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<StockHistory> stockHistories = new ArrayList<>();
-
-    @Builder
-    public Stock(int quantity, Product product) {
-        this.quantity = quantity;
-        this.product = product;
-
-        // Product 가 Stock 과 연결할 때, Product 도 Stock 를 설정하도록 함
-        if (product != null) {
-            product.setStock(this);
-        }
-    }
+    private List<StockHistory> stockHistories = new ArrayList<>(); // 재고기록과의 1 : N 관계
 
     // Product: 연관관계 편의 메서드 추가
     public void setProduct(Product product) {
@@ -53,6 +43,39 @@ public class Stock extends BaseTimeEntity {
             stockHistory.setStock(this);
         }
     }
+
+
+    // 재고 생성
+    public static Stock create(int quantity) {
+        return Stock.builder()
+                .quantity(quantity)
+                .build();
+    }
+
+    // 재고 수량 변경 메서드 (updateRequestDTO)
+    public void updateQuantity(int newQuantity) {
+        int change = newQuantity - this.quantity;
+
+        if (change == 0) return; // 수량 변경이 없으면 종료
+
+        this.quantity = newQuantity;
+
+        // 변화 방향에 따라 상태 변경
+        if (change > 0) {
+            updateStockHistory(StockStatus.STOCK_INCREASED, change);
+        } else {
+            updateStockHistory(StockStatus.STOCK_DECREASED, change);
+        }
+    }
+
+
+    // 재고 변경이력을 자동으로 저장
+    private void updateStockHistory(StockStatus status, int quantityChange) {
+        StockHistory history = StockHistory.createHistory(this, status, quantityChange);
+        addStockHistory(history);
+    }
+
+
 
     // 재고 증가
     public void increaseStock(int amount) {
@@ -89,30 +112,5 @@ public class Stock extends BaseTimeEntity {
         this.quantity = 0;
         updateStockHistory(StockStatus.SOLD_OUT, 0);
     }
-
-    // 재고 수량 변경 메서드 (updateRequestDTO)
-    public void updateQuantity(int newQuantity) {
-        int change = newQuantity - this.quantity;
-
-        if (change == 0) return; // 수량 변경이 없으면 종료
-
-        this.quantity = newQuantity;
-
-        // 변화 방향에 따라 상태 변경
-        if (change > 0) {
-            updateStockHistory(StockStatus.STOCK_INCREASED, change);
-        } else {
-            updateStockHistory(StockStatus.STOCK_DECREASED, change);
-        }
-    }
-
-
-    // 재고 변경이력을 자동으로 저장
-    private void updateStockHistory(StockStatus status, int quantityChange) {
-        StockHistory history = StockHistory.createHistory(this, status, quantityChange);
-        addStockHistory(history);
-    }
-
-
 
 }

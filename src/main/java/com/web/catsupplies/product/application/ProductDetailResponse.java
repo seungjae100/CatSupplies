@@ -1,11 +1,11 @@
 package com.web.catsupplies.product.application;
 
 import com.web.catsupplies.product.domain.Product;
-import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 @Getter
-@AllArgsConstructor
+@Builder
 public class ProductDetailResponse {
 
     private String name;
@@ -16,13 +16,13 @@ public class ProductDetailResponse {
     private int stockQuantity;
 
     public static ProductDetailResponse fromEntity(Product product) {
-        return new ProductDetailResponse(
-                product.getName(),
-                product.getPrice(),
-                product.getImgUrl(),
-                product.getDescription(),
-                product.getCompany().getCompanyName(),
-                product.getStock().getQuantity()
-        );
+        return ProductDetailResponse.builder()
+                .name(product.getName())
+                .price(product.getPrice())
+                .imgUrl(product.getImgUrl())
+                .description(product.getDescription())
+                .companyName(product.getCompany().getCompanyName())
+                .stockQuantity(product.getStock().getQuantity())
+                .build();
     }
 }

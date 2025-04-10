@@ -70,7 +70,7 @@ public class CompanyService {
             throw new AccessDeniedException("로그인한 기업만이 수정할 수 있습니다.");
         }
         // 데이터베이스에 기록이 있는 기업정보인지 확인
-        Company company = companyRepository.finByIdAndDeletedFalse(companyId)
+        Company company = companyRepository.findByIdAndDeletedFalse(companyId)
                 .orElseThrow(() -> new NotFoundException("없는 기업입니다."));
 
         // 정보 부분 수정
@@ -114,7 +114,7 @@ public class CompanyService {
     public void deleteCompany(Long CompanyId) {
 
         // 기업 정보가 데이터베이스에 저장되어 있는지 확인
-        Company company = companyRepository.finByIdAndDeletedFalse(CompanyId)
+        Company company = companyRepository.findByIdAndDeletedFalse(CompanyId)
                 .orElseThrow(() -> new NotFoundException("기업정보가 존재하지 않습니다."));
 
         // 이미 기업이 탈퇴한 상황
