@@ -3,25 +3,26 @@ package com.web.catsupplies.payment.application;
 import com.web.catsupplies.payment.domain.Payment;
 import com.web.catsupplies.payment.domain.PaymentStatus;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
 
 @Getter
-@AllArgsConstructor
+@Builder
 public class PaymentResponse {
 
     private Long paymentId;
     private int amount;
-    private PaymentStatus paymentStatus;
+    private String paymentStatus;
     private LocalDateTime paidAt;
 
     public static PaymentResponse from(Payment payment) {
-        return new PaymentResponse(
-                payment.getId(),
-                payment.getAmount(),
-                payment.getPaymentStatus(),
-                payment.getPaidAt()
-        );
+        return PaymentResponse.builder()
+                .paymentId(payment.getId())
+                .amount(payment.getAmount())
+                .paymentStatus(payment.getPaymentStatus().name())
+                .paidAt(payment.getPaidAt())
+                .build();
     }
 }

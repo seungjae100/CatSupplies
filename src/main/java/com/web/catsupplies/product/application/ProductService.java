@@ -20,6 +20,8 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final CompanyRepository companyRepository;
 
+    // 제품 등록
+    @Transactional
     public Long createProduct(Long companyId, CreateProductRequest request) {
         // 로그인한 기업의 정보를 가져온다.
         Company company = companyRepository.findByIdAndDeletedFalse(companyId)
@@ -87,7 +89,7 @@ public class ProductService {
     }
 
     // 내가 등록한 제품 조회
-    @Transactional
+    @Transactional(readOnly = true)
     public List<ProductListResponse> getProductsByCompany(Long companyId) {
         List<Product> products = productRepository.findAllByCompanyIdAndDeletedFalse(companyId);
 
@@ -96,11 +98,24 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    // 등록한 제품 상세조회
-    public ProductDetailResponse getProductDetail(Long productId) {
+    // 등록한 제품 상세조회 ( 사용자 )
+    @Transactional(readOnly = true)
+    public ProductDetailForUserResponse getProductDetailForUser(Long productId) {
+        Product product = productRepository.findByIdAndDeletedFalse(productId)
+                .orElseThrow(() -> new NotFoundException("해당 제품이 존재하지 않습니다."));
+        return ProductDetailForUserResponse.fromEntity(product);
+    }
+
+    // 등록한 제품 상세조회 ( 기업 )
+    @Transactional(readOnly = true)
+    public ProductDetailForCompanyResponse getProductDetailForCompany(Long productId, Long companyId) {
         Product product = productRepository.findByIdAndDeletedFalse(productId)
                 .orElseThrow(() -> new NotFoundException("해당 제품이 존재하지 않습니다."));
 
-        return ProductDetailResponse.fromEntity(product);
+        if (!product.getCompany().getId().equals(companyId)) {
+            throw new SecurityException("본인의 제품만 조회할 수 있습니다.");
+        }
+
+        return ProductDetailForCompanyResponse.fromEntity(product);
     }
 }

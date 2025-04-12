@@ -5,8 +5,6 @@ import com.web.catsupplies.order.domain.Order;
 import com.web.catsupplies.order.domain.OrderItem;
 import com.web.catsupplies.order.domain.OrderStatus;
 import com.web.catsupplies.order.repository.OrderRepository;
-import com.web.catsupplies.payment.domain.Payment;
-import com.web.catsupplies.payment.domain.PaymentStatus;
 import com.web.catsupplies.product.domain.Product;
 import com.web.catsupplies.product.repository.ProductRepository;
 import com.web.catsupplies.user.domain.User;
@@ -39,19 +37,11 @@ public class OrderService {
 
         Order order = Order.builder()
                 .user(user)
-                .orderStatus(OrderStatus.PAID)
+                .orderStatus(OrderStatus.PENDING)
                 .totalPrice(orderItem.getTotalPrice())
                 .build();
 
         order.addOrderItem(orderItem);
-
-        Payment payment = Payment.builder()
-                .order(order)
-                .paymentStatus(PaymentStatus.PAID)
-                .amount(order.getTotalPrice())
-                .build();
-
-        order.setPayment(payment);
 
         orderRepository.save(order);
     }
@@ -84,5 +74,17 @@ public class OrderService {
         return orders.stream()
                 .map(OrderListResponse::from)
                 .collect(Collectors.toList());
+    }
+
+    // 주문 상세 조회
+    @Transactional(readOnly = true)
+    public OrderDetailResponse getOrderDetail(Long orderId, Long userId) {
+        // 주문내역이 데이터베이스에 존재하는지 확인
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new IllegalArgumentException("주문내역이 존재하지 않습니다."));
+        if (!order.getUser().getId().equals(userId)) {
+            throw new IllegalArgumentException("본인의 주문만 조회할 수 있습니다.");
+        }
+        return OrderDetailResponse.from(order);
     }
 }

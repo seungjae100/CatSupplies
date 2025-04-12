@@ -78,15 +78,28 @@ public class ProductController {
         return ResponseEntity.ok(products);
     }
 
-    // 제품 상세 조회
+    // 제품 상세 조회 (사용자)
     @Operation(
-            summary = "제품상세조회",
+            summary = "제품상세조회(사용자)",
             description = "JWT 인증필요, 기업 제품 상세 조회 가능, 사용자 조회 가능(홈페이지)    ",
             security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
     )
     @GetMapping("/list/{productId}")
-    public ResponseEntity<ProductDetailResponse> getProductDetail(@PathVariable Long productId) {
-        ProductDetailResponse response = productService.getProductDetail(productId);
+    public ResponseEntity<ProductDetailForUserResponse> getProductDetailForUser(@PathVariable Long productId) {
+        ProductDetailForUserResponse response = productService.getProductDetailForUser(productId);
+        return ResponseEntity.ok(response);
+    }
+
+    // 제품 상세 조회 (기업)
+    @Operation(
+            summary = "제품상세조회(기업)",
+            description = "JWT 인증필요, 기업 제품 상세 조회 가능, 사용자 조회 가능(홈페이지)    ",
+            security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
+    )
+    @GetMapping("/list/{productId}")
+    public ResponseEntity<ProductDetailForCompanyResponse> getProductDetailForCompany(@PathVariable Long productId,
+                                                                                      Long companyId) {
+        ProductDetailForUserResponse response = productService.getProductDetailForCompany(productId, companyId);
         return ResponseEntity.ok(response);
     }
 

@@ -7,7 +7,7 @@ import lombok.Getter;
 @Getter
 @Builder
 public class ProductListResponse {
-
+    // 제품 리스트
     private String name;
     private int price;
     private String imgUrl;

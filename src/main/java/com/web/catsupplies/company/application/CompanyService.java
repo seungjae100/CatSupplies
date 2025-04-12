@@ -13,6 +13,7 @@ import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -24,6 +25,7 @@ public class CompanyService {
     private final TokenService tokenService;
 
     // 회원가입
+    @Transactional
     public void register(CompanyRegisterRequest request) {
         if (companyRepository.existsByEmailAndDeletedFalse(request.getEmail())) {
             throw new IllegalArgumentException("이미 존재하는 이메일입니다.");
@@ -64,6 +66,7 @@ public class CompanyService {
     }
 
     // 정보 수정
+    @Transactional
     public void modify(CompanyModifyRequest request, Long companyId, Long loginCompanyId) {
         // 로그인한 본인 기업인지 확인
         if (!companyId.equals(loginCompanyId)) {
@@ -111,6 +114,7 @@ public class CompanyService {
     }
 
     // 기업 탈퇴
+    @Transactional
     public void deleteCompany(Long CompanyId) {
 
         // 기업 정보가 데이터베이스에 저장되어 있는지 확인

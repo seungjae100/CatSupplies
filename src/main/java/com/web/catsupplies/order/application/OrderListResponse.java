@@ -5,18 +5,16 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Getter
 @Builder
 public class OrderListResponse {
 
-    private Long orderId;
-    private int totalPrice;
-    private String orderStatus;
-    private LocalDateTime createdAt;
-    private List<OrderItemResponse> items;
+    private Long orderId; // 주문
+    private int totalPrice; // 총 가격 합계
+    private String orderStatus; // 주문 상태
+    private LocalDateTime createdAt; // 주문한 시간
+
 
     public static OrderListResponse from(Order order) {
         return OrderListResponse.builder()
@@ -24,10 +22,6 @@ public class OrderListResponse {
                 .totalPrice(order.getTotalPrice())
                 .orderStatus(order.getOrderStatus().name())
                 .createdAt(order.getCreatedAt())
-                .items(order.getOrderItems()
-                        .stream()
-                        .map(OrderItemResponse::from)
-                        .collect(Collectors.toList()))
                 .build();
     }
 

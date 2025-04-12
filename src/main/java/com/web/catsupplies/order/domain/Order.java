@@ -59,6 +59,17 @@ public class Order extends BaseTimeEntity {
         }
     }
 
+    // 주문 생성 (정적 메서드)
+    public static Order create(User user, OrderItem orderItem, Payment payment) {
+        Order order = new Order();
+        order.user = user;
+        order.orderStatus = OrderStatus.PAID;
+        order.totalPrice = orderItem.getTotalPrice();
+        order.addOrderItem(orderItem);
+        order.setPayment(payment);
+        return order;
+    }
+
     // 주문 취소
     public void cancel() {
         this.orderStatus = OrderStatus.CANCELLED;

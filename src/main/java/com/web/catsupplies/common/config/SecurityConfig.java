@@ -37,13 +37,21 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**"
                         ).permitAll()
-                        // 공개 API
+                            // 회원가입, 로그인 허용
                         .requestMatchers("/api/user/register",  "/api/user/login",
                                         "/api/company/register", "/api/company/login").permitAll()
 
-                        // 권한 제어
+                        // 제품 조회는 모두 가능
                         .requestMatchers("/api/products/", "/api/products/**").hasAnyRole("USER", "COMPANY")
+
+                        // 제품 등록, 수정, 삭제는 기업만
                         .requestMatchers("/api/products/create", "/api/products/update/**", "/api/products/delete").hasRole("COMPANY")
+
+                        // 주문은 사용자만
+                        .requestMatchers("/api/orders/**").hasRole("USER")
+
+                        // 결제도 사용자만
+                        .requestMatchers("/api/payments/** ").hasRole("USER")
 
                         // 그 외는 인증필요
                         .anyRequest().authenticated()

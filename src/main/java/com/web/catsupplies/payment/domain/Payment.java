@@ -9,6 +9,7 @@ import java.time.LocalDateTime;
 
 @Entity
 @Getter
+@Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(name = "payments")
@@ -31,20 +32,23 @@ public class Payment extends BaseTimeEntity {
     // 결제 완료 시간
     private LocalDateTime paidAt;
 
-    @Builder
-    public Payment(Order order, PaymentStatus paymentStatus, int amount) {
-        this.order = order;
-        this.paymentStatus = paymentStatus;
-        this.amount = amount;
-        this.paidAt = (paymentStatus == PaymentStatus.PAID ? LocalDateTime.now() : null);
-    }
-
     // Order 연관관계 메서드
     public void setOrder(Order order) {
         this.order = order;
         if (order.getPayment() != this) {
             order.setPayment(this);
         }
+    }
+
+    // 결제 생성
+    public static Payment create(Order order, int amount) {
+        Payment payment = Payment.builder()
+                .order(order)
+                .amount(amount)
+                .paymentStatus(PaymentStatus.READY)
+                .build();
+        payment.setOrder(order);
+        return payment;
     }
 
     // 결제 성공
