@@ -11,7 +11,7 @@ import java.util.Optional;
 public interface ProductRepository extends JpaRepository<Product, Long> {
 
     // 삭제된 제품 제외하고 제품의 기본키 조회
-    Optional<Product> findByIdAndDeletedFalse(Long id);
+    Optional<Product> findByIdAndDeletedFalse(Long productId);
 
     // 삭제된 제품 제외하고 기업이 제품 등록한 목록을 모두 조회
     List<Product> findAllByCompanyIdAndDeletedFalse(Long comanyId);

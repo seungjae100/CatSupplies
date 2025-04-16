@@ -99,7 +99,7 @@ public class ProductController {
     @GetMapping("/list/{productId}")
     public ResponseEntity<ProductDetailForCompanyResponse> getProductDetailForCompany(@PathVariable Long productId,
                                                                                       Long companyId) {
-        ProductDetailForUserResponse response = productService.getProductDetailForCompany(productId, companyId);
+        ProductDetailForCompanyResponse response = productService.getProductDetailForCompany(productId, companyId);
         return ResponseEntity.ok(response);
     }
 

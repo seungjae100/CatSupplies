@@ -27,9 +27,12 @@ public class ProductService {
         Company company = companyRepository.findByIdAndDeletedFalse(companyId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 기업을 찾을 수 없습니다."));
 
-        // 재고 수량 null 이면 0으로 표시
-        int quantity = request.getStockQuantity() != null ? request.getStockQuantity() : 0;
+        int quantity = 0;
         Stock stock = Stock.create(quantity);
+        if(request.getStockQuantity() != null && request.getStockQuantity() > 0) {
+            stock.inboundStock(request.getStockQuantity());
+        }
+
 
         Product product = Product.create(
                 request.getCode(),
@@ -85,7 +88,7 @@ public class ProductService {
             throw new SecurityException("해당 제품을 삭제할 권한이 없습니다.");
         }
 
-        productRepository.delete(product);
+        product.remove();
     }
 
     // 내가 등록한 제품 조회
