@@ -53,6 +53,12 @@ public class SecurityConfig {
                         // 결제도 사용자만
                         .requestMatchers("/api/payments/** ").hasRole("USER")
 
+                        // 재고 조작은 기업만 가능
+                        .requestMatchers("/api/stocks/**").hasRole("COMPANY")
+
+                        // 재고 변경 이력도 기업만 가능
+                        .requestMatchers("/api/stocks/history/**").hasRole("COMPANY")
+
                         // 그 외는 인증필요
                         .anyRequest().authenticated()
                 )
