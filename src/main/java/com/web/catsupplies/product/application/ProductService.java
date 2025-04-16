@@ -4,7 +4,7 @@ import com.web.catsupplies.common.exception.NotFoundException;
 import com.web.catsupplies.company.domain.Company;
 import com.web.catsupplies.company.repository.CompanyRepository;
 import com.web.catsupplies.product.domain.Product;
-import com.web.catsupplies.product.domain.Stock;
+import com.web.catsupplies.stock.domain.Stock;
 import com.web.catsupplies.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
