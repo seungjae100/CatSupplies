@@ -1,6 +1,8 @@
 package com.web.catsupplies.user.domain;
-
+// 권한
 public enum Role {
 
-    USER, COMPANY, ADMIN
+    USER, // 사용자
+    COMPANY // 기업
+
 }

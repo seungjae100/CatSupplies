@@ -25,21 +25,17 @@ public class PaymentService {
         Order order = orderRepository.findById(request.getOrderId())
                 .orElseThrow(() -> new IllegalArgumentException("해당 주문이 존재하지 않습니다."));
 
-        // 2. Payment 객체 생성 (Mock 결제 성공처리)
-        Payment payment = Payment.builder()
-                .order(order)
-                .amount(request.getAmount())
-                .paymentStatus(PaymentStatus.PAID)
-                .build();
+        // 2. 서버에서 총 결제 금액 계산
+        int totalAmount = order.getTotalPrice();
 
-        // 3. 연관관계를 사용한 양반향 매핑
-        payment.setOrder(order); // order -> payment 연결
+        // 3. 결제 생성
+        Payment payment = Payment.create(order, totalAmount);
 
-        // 4. 저장
-        Payment savedPayment = paymentRepository.save(payment);
+        // 4. 결제 성공처리 (상태변경 : READY -> PAID)
+        payment.completePayment();
 
-        // 5. 응답 DTO 반환
-        return PaymentResponse.from(savedPayment);
+        // 5. 저장 후 응답 반환
+        return PaymentResponse.from(paymentRepository.save(payment));
     }
 
     // 결제 취소

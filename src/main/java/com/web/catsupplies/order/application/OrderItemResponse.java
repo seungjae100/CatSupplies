@@ -13,11 +13,11 @@ public class OrderItemResponse {
     private int price;
     private String productImg;
 
-    public static OrderItemResponse from(OrderItem item) {
+    public static OrderItemResponse from (OrderItem item) {
         return OrderItemResponse.builder()
                 .productName(item.getProduct().getName())
                 .quantity(item.getQuantity())
-                .price(item.getQuantity())
+                .price(item.getProduct().getPrice())
                 .productImg(item.getProduct().getImgUrl())
                 .build();
     }

@@ -1,10 +1,7 @@
 package com.web.catsupplies.product.controller;
 
 import com.web.catsupplies.common.jwt.CompanyDetails;
-import com.web.catsupplies.product.application.CreateProductRequest;
-import com.web.catsupplies.product.application.ProductListResponse;
-import com.web.catsupplies.product.application.ProductService;
-import com.web.catsupplies.product.application.UpdateProductRequest;
+import com.web.catsupplies.product.application.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -45,7 +42,7 @@ public class ProductController {
             description = "JWT 인증필요, 기업 제품 수정 가능, 사용자 불가",
             security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
     )
-    @PutMapping("/{productId}")
+    @PatchMapping("/{productId}")
     public ResponseEntity<?> updateProduct(@RequestBody @Valid UpdateProductRequest request,
                                            @PathVariable Long productId,
                                            @AuthenticationPrincipal CompanyDetails companyDetails) {
@@ -79,6 +76,31 @@ public class ProductController {
         Long companyId = companyDetails.getCompanyId();
         List<ProductListResponse> products = productService.getProductsByCompany(companyId);
         return ResponseEntity.ok(products);
+    }
+
+    // 제품 상세 조회 (사용자)
+    @Operation(
+            summary = "제품상세조회(사용자)",
+            description = "JWT 인증필요, 기업 제품 상세 조회 가능, 사용자 조회 가능(홈페이지)    ",
+            security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
+    )
+    @GetMapping("/list/{productId}")
+    public ResponseEntity<ProductDetailForUserResponse> getProductDetailForUser(@PathVariable Long productId) {
+        ProductDetailForUserResponse response = productService.getProductDetailForUser(productId);
+        return ResponseEntity.ok(response);
+    }
+
+    // 제품 상세 조회 (기업)
+    @Operation(
+            summary = "제품상세조회(기업)",
+            description = "JWT 인증필요, 기업 제품 상세 조회 가능, 사용자 조회 가능(홈페이지)    ",
+            security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
+    )
+    @GetMapping("/list/{productId}")
+    public ResponseEntity<ProductDetailForCompanyResponse> getProductDetailForCompany(@PathVariable Long productId,
+                                                                                      Long companyId) {
+        ProductDetailForCompanyResponse response = productService.getProductDetailForCompany(productId, companyId);
+        return ResponseEntity.ok(response);
     }
 
 

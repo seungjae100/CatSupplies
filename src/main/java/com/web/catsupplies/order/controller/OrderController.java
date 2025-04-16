@@ -59,10 +59,23 @@ public class OrderController {
             description = "JWT",
             security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
     )
-    @GetMapping("/list")
+    @GetMapping("")
     public ResponseEntity<?> getMyOrders(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getUserId();
         List<OrderListResponse> response = orderService.getMyOrders(userId);
         return ResponseEntity.ok(response);
+    }
+
+    // 주문 상세 조회
+    @Operation(
+            summary = "주문상세조회",
+            description = "JWT",
+            security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
+    )
+    @GetMapping("/{orderId}")
+    public ResponseEntity<?> getOrderDetail(@PathVariable Long orderId,
+                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
+        return ResponseEntity.ok(orderService.getOrderDetail(orderId, userId));
     }
 }

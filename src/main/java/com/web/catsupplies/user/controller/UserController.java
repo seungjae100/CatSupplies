@@ -1,5 +1,6 @@
 package com.web.catsupplies.user.controller;
 
+import com.web.catsupplies.common.jwt.CustomUserDetails;
 import com.web.catsupplies.user.application.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -10,10 +11,10 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.web.bind.annotation.*;
+
 @Tag(name = "User", description = "사용자 관련 API")
 @RestController
 @RequestMapping("/api/user")
@@ -46,16 +47,16 @@ public class UserController {
         return ResponseEntity.ok("로그인이 완료되었습니다.");
     }
 
-    // 로그아웃
+    // 정보 수정
     @Operation(
-            summary = "로그아웃",
+            summary = "정보수정",
             description = "JWT",
             security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
     )
-    @PostMapping("/logout")
-    public ResponseEntity<String> logout(HttpServletResponse response, HttpServletRequest request) {
-        userService.logout(request, response);
-        return ResponseEntity.ok("로그아웃 완료되었습니다.");
+    @PatchMapping("/{userId}")
+    public ResponseEntity<String> modify(@RequestBody ModifyRequest request, @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long userId) {
+        userService.modify(request, userId, userDetails.getUserId());
+        return ResponseEntity.ok().build();
     }
 
     // 재발급토큰
@@ -68,6 +69,30 @@ public class UserController {
     public ResponseEntity<String> reAccessToken(HttpServletRequest request, HttpServletResponse response) {
         userService.reAccessToken(request, response);
         return ResponseEntity.ok("AccessToken이 재발급되었습니다.");
+    }
+
+    // 로그아웃
+    @Operation(
+            summary = "로그아웃",
+            description = "JWT",
+            security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
+    )
+    @PostMapping("/logout")
+    public ResponseEntity<String> logout(HttpServletResponse response, HttpServletRequest request) {
+        userService.logout(request, response);
+        return ResponseEntity.ok("로그아웃 완료되었습니다.");
+    }
+
+    // 탈퇴
+    @Operation(
+            summary = "회원탈퇴",
+            description = "JWT",
+            security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
+    )
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> deleteUser(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        userService.deleteUser(userDetails.getUserId());
+        return ResponseEntity.noContent().build();
     }
 
 
