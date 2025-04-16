@@ -1,4 +1,4 @@
-package com.web.catsupplies.product.domain;
+package com.web.catsupplies.stock.domain;
 
 public enum StockStatus {
 

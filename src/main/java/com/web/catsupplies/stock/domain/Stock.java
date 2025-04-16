@@ -1,5 +1,7 @@
-package com.web.catsupplies.product.domain;
+package com.web.catsupplies.stock.domain;
 
+import com.web.catsupplies.product.domain.Product;
+import com.web.catsupplies.stockhistory.domain.StockHistory;
 import com.web.catsupplies.user.domain.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;

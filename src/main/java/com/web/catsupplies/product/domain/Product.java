@@ -1,6 +1,7 @@
 package com.web.catsupplies.product.domain;
 
 import com.web.catsupplies.company.domain.Company;
+import com.web.catsupplies.stock.domain.Stock;
 import com.web.catsupplies.user.domain.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
