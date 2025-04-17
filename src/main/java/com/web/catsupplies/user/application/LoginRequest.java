@@ -1,5 +1,6 @@
 package com.web.catsupplies.user.application;
 
+import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
@@ -16,8 +17,10 @@ public class LoginRequest {
 
     @NotBlank(message = "이메일을 입력해주세요.")
     @Email
+    @Schema(description = "이메일을 입력합니다.", example = "test@gmail.com")
     private String email;
 
     @NotBlank(message = "비밀번호를 입력해주세요")
+    @Schema(description = "비밀변호를 입력합니다.", example = "password1234*")
     private String password;
 }
