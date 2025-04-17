@@ -19,7 +19,7 @@ public class RegisterRequest {
 
     @NotBlank(message = "비밀번호를 입력해주세요.")
     @Pattern(regexp = RegexPatterns.PASSWORD_PATTERN, message = "비밀번호는 8~16자 영문 대소문자, 숫자, 특수문자를 포함해야 합니다.")
-    @Schema(description = "비밀번호를 입력합니다.", example = "password1234*")
+    @Schema(description = "비밀번호", example = "8~16 자, 영문,숫자,특수문자 필수")
     private String password;
 
     @NotBlank(message = "이름을 입력해주세요.")
@@ -27,7 +27,7 @@ public class RegisterRequest {
     private String name;
 
     @NotBlank(message = "전화번호를 입력해주세요.")
-    @Schema(description = "전화번호를 입력합니다.", example = "01012341234")
+    @Schema(description = "핸드폰번호", example = "핸드폰번호 - 없이 작성")
     private String phone;
 
     @NotBlank(message = "주소를 입력해주세요.")

@@ -84,7 +84,7 @@ public class ProductController {
             description = "JWT 인증필요, 기업 제품 상세 조회 가능, 사용자 조회 가능(홈페이지)    ",
             security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
     )
-    @GetMapping("/list/{productId}")
+    @GetMapping("/list/user/{productId}")
     public ResponseEntity<ProductDetailForUserResponse> getProductDetailForUser(@PathVariable Long productId) {
         ProductDetailForUserResponse response = productService.getProductDetailForUser(productId);
         return ResponseEntity.ok(response);
@@ -96,10 +96,10 @@ public class ProductController {
             description = "JWT 인증필요, 기업 제품 상세 조회 가능, 사용자 조회 가능(홈페이지)    ",
             security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
     )
-    @GetMapping("/list/{productId}")
+    @GetMapping("/list/company/{productId}")
     public ResponseEntity<ProductDetailForCompanyResponse> getProductDetailForCompany(@PathVariable Long productId,
-                                                                                      Long companyId) {
-        ProductDetailForCompanyResponse response = productService.getProductDetailForCompany(productId, companyId);
+                                                                                      @AuthenticationPrincipal CompanyDetails companyDetails) {
+        ProductDetailForCompanyResponse response = productService.getProductDetailForCompany(productId, companyDetails.getCompanyId());
         return ResponseEntity.ok(response);
     }
 

@@ -21,6 +21,6 @@ public class LoginRequest {
     private String email;
 
     @NotBlank(message = "비밀번호를 입력해주세요")
-    @Schema(description = "비밀변호를 입력합니다.", example = "password1234*")
+    @Schema(description = "비밀번호", example = "8~16 자, 영문,숫자,특수문자 필수")
     private String password;
 }
