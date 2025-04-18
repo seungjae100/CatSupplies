@@ -94,7 +94,7 @@ public class Stock extends BaseTimeEntity {
         updateStockHistory(StockStatus.STOCK_DECREASED, -amount);
     }
 
-    // 재고 입고 처리 (입고, 재입고)
+    // 재고 입고 처리
     public void inboundStock(int amount) {
         this.quantity += amount;
         updateStockHistory(StockStatus.INBOUND, amount);

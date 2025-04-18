@@ -12,13 +12,13 @@ import java.time.LocalDateTime;
 @Builder
 public class StockHistoryResponse {
 
-    @Schema(description = "제품의 상태를 조회합니다.", example = "52 개")
+    @Schema(description = "제품의 상태를 조회합니다.", example = "INBOUND, OUTBOUND, SOLD_OUT, STOCK_INCREASED, STOCK_DECREASED")
     private StockStatus stockStatus;
 
-    @Schema(description = "변화하는 수량을 조회합니다.", example = "52 개")
+    @Schema(description = "변화하는 수량을 조회합니다.", example = "23 개")
     private int quantityChange;
 
-    @Schema(description = "재고변경일을 조회합니다.", example = "52 개")
+    @Schema(description = "재고변경일을 조회합니다.", example = "2025-04-17T05:00:15.687Z")
     private LocalDateTime createdAt;
 
     public static StockHistoryResponse from(StockHistory stockHistory) {
