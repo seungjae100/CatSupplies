@@ -29,7 +29,7 @@ public class ProductService {
 
         int quantity = 0;
         Stock stock = Stock.create(quantity);
-        if(request.getStockQuantity() != null && request.getStockQuantity() > 0) {
+        if (request.getStockQuantity() != null && request.getStockQuantity() > 0) {
             stock.inboundStock(request.getStockQuantity());
         }
 

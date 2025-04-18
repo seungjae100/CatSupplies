@@ -44,7 +44,7 @@ public class PaymentController {
             description = "JWT 인증필요, 사용자 결제취소가능",
             security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
     )
-    @PatchMapping("/{paymentId}/cancel")
+    @PatchMapping("/{paymentId}")
     public ResponseEntity<?> cancelPayment(@PathVariable Long paymentId,
                                            @AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getUserId();
@@ -58,7 +58,7 @@ public class PaymentController {
             description = "JWT 인증필요, 사용자 결제내역  확인가능",
             security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
     )
-    @GetMapping("/list")
+    @GetMapping
     public ResponseEntity<List<PaymentResponse>> getMyPayment(@AuthenticationPrincipal CustomUserDetails userDetails) {
         Long userId = userDetails.getUserId();
 
