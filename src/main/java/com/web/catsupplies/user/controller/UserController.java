@@ -80,7 +80,7 @@ public class UserController {
     @PostMapping("/logout")
     public ResponseEntity<String> logout(HttpServletResponse response, HttpServletRequest request) {
         userService.logout(request, response);
-        return ResponseEntity.ok("로그아웃 완료되었습니다.");
+        return ResponseEntity.ok("로그아웃이 완료되었습니다.");
     }
 
     // 탈퇴
