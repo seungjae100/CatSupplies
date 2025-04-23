@@ -29,8 +29,8 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -46,6 +46,8 @@ class UserControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    private CustomUserDetails userDetails;
 
 
 
@@ -88,7 +90,7 @@ class UserControllerTest {
         ReflectionTestUtils.setField(user, "id", 1L);
 
         // 3. CustomUserDetails
-        CustomUserDetails userDetails = new CustomUserDetails(user);
+        userDetails = new CustomUserDetails(user);
 
         // 4. 인증 정보 설정 (Authentication + SecurityContext)
         UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
@@ -126,5 +128,15 @@ class UserControllerTest {
                         .content(objectMapper.writeValueAsString(request)))
                 .andExpect(status().isOk());
 
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴 성공 테스트")
+    void 회원탈퇴_성공_테스트() throws Exception {
+        doNothing().when(userService).deleteUser(eq(1L));
+
+        mockMvc.perform(delete("/api/user/delete")
+                        .with(user(userDetails)))
+                .andExpect(status().isNoContent());
     }
 }
