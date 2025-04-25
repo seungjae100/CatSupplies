@@ -5,6 +5,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.web.util.WebUtils;
 
+import java.util.Optional;
+
 public class CookieUtils {
 
     // HttpOnly 쿠키 생성 설정
@@ -17,9 +19,9 @@ public class CookieUtils {
     }
 
     // 쿠키값 가져오기
-    public static String getCookie(HttpServletRequest request, String cookieName) {
+    public static Optional<String> getCookie(HttpServletRequest request, String cookieName) {
         Cookie cookie = WebUtils.getCookie(request, cookieName);
-        return (cookie != null) ? cookie.getValue() : null;
+        return (cookie != null) ? Optional.of(cookie.getValue()) : Optional.empty();
     }
 
     // HttpOnly 쿠키 삭제
