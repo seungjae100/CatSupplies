@@ -101,7 +101,9 @@ public class UserService {
 
     // AccessToken 재발급
     public void reAccessToken(HttpServletRequest request, HttpServletResponse response) {
-        String expiredToken = CookieUtils.getCookie(request, "accessToken");
+        String expiredToken = CookieUtils.getCookie(request, "accessToken")
+                .orElseThrow(() -> new AccessDeniedException("AccessToken이 존재하지 않습니다."));
+
         tokenService.reAccessToken(response, expiredToken);
     }
 

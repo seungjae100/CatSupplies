@@ -12,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
+
 
 @Service
 @RequiredArgsConstructor
@@ -89,12 +91,14 @@ public class TokenService {
     @Transactional
     public void logout(HttpServletRequest request, HttpServletResponse response) {
         // AccessToken 쿠키에서 가져오기
-        String accessToken = CookieUtils.getCookie(request, "accessToken");
+        Optional<String> optionalAccessToken = CookieUtils.getCookie(request, "accessToken");
 
         // AccessToken 이 없으면 이미 로그아웃된 상태 → 정상 종료
-        if (accessToken == null) {
+        if (optionalAccessToken.isEmpty()) {
             return; // 예외 발생 X, 그냥 정상 종료
         }
+
+        String accessToken = optionalAccessToken.get();
 
         // Claims 추출
         Claims claims = jwtTokenProvider.getClaimsFromToken(accessToken);
