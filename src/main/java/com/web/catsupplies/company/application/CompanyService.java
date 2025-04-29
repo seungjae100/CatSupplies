@@ -33,7 +33,7 @@ public class CompanyService {
 
         Company company = Company.create(
                 request.getEmail(),
-                request.getPassword(),
+                passwordEncoder.encode(request.getPassword()),
                 request.getPhone(),
                 request.getAddress(),
                 request.getCompanyName(),
