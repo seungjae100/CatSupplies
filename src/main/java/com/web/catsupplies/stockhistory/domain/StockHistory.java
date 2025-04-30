@@ -31,17 +31,18 @@ public class StockHistory extends BaseTimeEntity {
     // Stock 과의 연관관게 편의 메서드
     public void setStock(Stock stock) {
         this.stock = stock;
-        if (!stock.getStockHistories().contains(this)) {
-            stock.getStockHistories().add(this);
-        }
     }
 
     // 이력 생성 메서드
     public static StockHistory createHistory(Stock stock, StockStatus status, int quantityChange) {
-        return StockHistory.builder()
-                .stock(stock)
-                .stockStatus(status)
-                .quantityChange(quantityChange)
-                .build();
+        StockHistory history = new StockHistory();
+
+        history.stockStatus = status;
+        history.quantityChange = quantityChange;
+
+        // 연관관계 설정
+        stock.addStockHistory(history);
+
+        return history;
     }
 }

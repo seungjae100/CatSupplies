@@ -45,7 +45,7 @@ public class CompanyService {
     }
 
     // 로그인
-    public void login(CompanyLoginRequest request, HttpServletResponse response) {
+    public CompanyLoginResponse login(CompanyLoginRequest request, HttpServletResponse response) {
 
         Company company = companyRepository.findByEmailAndDeletedFalse(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("잘못된 이메일입니다."));
@@ -55,13 +55,15 @@ public class CompanyService {
         }
 
         // JWT 발급
-        String accessToken = jwtTokenProvider.createAccessToken(company.getEmail(), Role.COMPANY.name());
-        String refreshToken = jwtTokenProvider.createRefreshToken(company.getEmail(), Role.COMPANY.name());
+        String accessToken = jwtTokenProvider.createAccessToken(company.getEmail(), "ROLE_COMPANY");
+        String refreshToken = jwtTokenProvider.createRefreshToken(company.getEmail(), "ROLE_COMPANY");
 
         // RefreshToken 을 Redis 에 저장
         tokenService.RedisSaveRefreshToken(company.getEmail(), refreshToken);
         // AccessToken HttpOnly 쿠키에 저장
         CookieUtils.setCookie(response, "accessToken", accessToken, 60 * 60);
+
+        return new CompanyLoginResponse(accessToken);
 
     }
 

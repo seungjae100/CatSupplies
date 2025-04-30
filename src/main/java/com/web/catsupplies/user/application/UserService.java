@@ -50,7 +50,7 @@ public class UserService {
     }
 
     // 로그인
-    public void login(LoginRequest request, HttpServletResponse response) {
+    public LoginResponse login(LoginRequest request, HttpServletResponse response) {
 
         User user = userRepository.findByEmailAndDeletedFalse(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("이메일을 찾을 수 없습니다."));
@@ -67,6 +67,8 @@ public class UserService {
         tokenService.RedisSaveRefreshToken(user.getEmail(), refreshToken);
         // AccessToken HttpOnly 쿠키에 저장
         CookieUtils.setCookie(response, "accessToken", accessToken, 60 * 60); // 1 시간
+
+        return new LoginResponse(accessToken);
 
     }
 

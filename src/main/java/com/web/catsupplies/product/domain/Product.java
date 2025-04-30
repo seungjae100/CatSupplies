@@ -33,6 +33,10 @@ public class Product extends BaseTimeEntity {
     @Column(nullable = false)
     private String description; // 제품 설명
 
+    // 제품 삭제 메서드
+    @Column(nullable = false)
+    private boolean deleted = false;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "company_id", nullable = false)
     private Company company; // 기업과의 조인관계 (기업 1 : N 제품)
@@ -43,6 +47,7 @@ public class Product extends BaseTimeEntity {
     // Stock: 연관관계 편의 메서드 추가
     public void setStock(Stock stock) {
         this.stock = stock;
+        // 양방향 연관관계 설정
         if (stock.getProduct() != this) {
             stock.setProduct(this);
         }
@@ -51,43 +56,21 @@ public class Product extends BaseTimeEntity {
     // Company: 연관관계 편의 메서드 추가
     public void setCompany(Company company) {
         this.company = company;
-        if (!company.getProduct().contains(this)) {
-            company.getProduct().add(this); // 양방향 관계 유지
-        }
-    }
-
-    // 제품 삭제 메서드
-    @Column(nullable = false)
-    private boolean deleted = false;
-
-    public void remove() {
-        this.deleted = true;
-    }
-
-    public boolean isDeleted() {
-        return deleted;
     }
 
     // 제품 생성 메서드
     public static Product create(String code, String name, int price, String imgUrl, String description, Company company, Stock stock) {
-        Product product = Product.builder()
-                .code(code)
-                .name(name)
-                .price(price)
-                .imgUrl(imgUrl)
-                .description(description)
-                .company(company)
-                .stock(stock)
-                .build();
+        Product product = new Product();
+        product.code = code;
+        product.name = name;
+        product.price = price;
+        product.imgUrl = imgUrl;
+        product.description = description;
+        product.company = company;
 
-        // Product 가 Stock 과 연결할 때, Stock 도 Product 를 설정하도록 함
-        if (stock != null) {
-            stock.setProduct(product);
-        }
-        // Product 가 Company 와 연결할 때 Company 도 Product 를 설정하도록 함
-        if (company != null) {
-            company.addProduct(product);
-        }
+        // 연관관계 편의 메서드
+        company.addProduct(product); // Company ↔ Product
+        product.setStock(stock);     // Product ↔ Stock (양방향 연결)
 
         return product;
     }
@@ -99,6 +82,14 @@ public class Product extends BaseTimeEntity {
         if (price != null) this.price = price;
         if (imgUrl != null) this.imgUrl = imgUrl;
         if (description != null) this.description = description;
+    }
+
+    public void remove() {
+        this.deleted = true;
+    }
+
+    public boolean isDeleted() {
+        return deleted;
     }
 
 }

@@ -78,6 +78,7 @@ public class Company extends BaseTimeEntity {
                 .companyName(companyName)
                 .boss(boss)
                 .licenseNumber(licenseNumber)
+                .role(Role.COMPANY)
                 .build();
     }
 

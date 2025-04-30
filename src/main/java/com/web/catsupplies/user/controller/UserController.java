@@ -1,5 +1,7 @@
 package com.web.catsupplies.user.controller;
 
+import com.web.catsupplies.common.exception.AccessDeniedException;
+import com.web.catsupplies.common.jwt.CookieUtils;
 import com.web.catsupplies.common.jwt.CustomUserDetails;
 import com.web.catsupplies.user.application.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,9 +44,9 @@ public class UserController {
             security = @SecurityRequirement(name = "") // JWT 인증 제외
     )
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody @Valid LoginRequest request, HttpServletResponse response) {
-        userService.login(request, response); // 사용자 정보 가져오기
-        return ResponseEntity.ok("로그인이 완료되었습니다.");
+    public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request, HttpServletResponse response) {
+        LoginResponse loginResponse = userService.login(request, response); // 사용자 정보 가져오기
+        return ResponseEntity.ok(loginResponse);
     }
 
     // 정보 수정
@@ -66,7 +68,19 @@ public class UserController {
             security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
     )
     @PostMapping("/reAccessToken")
-    public ResponseEntity<String> reAccessToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<String> reAccessToken(HttpServletRequest request,
+                                                HttpServletResponse response,
+                                                @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        String expiredAccessToken = null;
+
+        // Swagger에서 Authorization 헤더로 토큰을 넘겼을 경우 처리
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            expiredAccessToken = authHeader.substring(7);
+        } else {
+            // 쿠키에서 accessToken을 꺼내는 기존 로직
+            expiredAccessToken = CookieUtils.getCookie(request, "accessToken")
+                    .orElseThrow(() -> new AccessDeniedException("AccessToken이 존재하지 않습니다."));
+        }
         userService.reAccessToken(request, response);
         return ResponseEntity.ok("AccessToken이 재발급되었습니다.");
     }

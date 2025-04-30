@@ -7,12 +7,14 @@ import com.web.catsupplies.product.domain.Product;
 import com.web.catsupplies.stock.domain.Stock;
 import com.web.catsupplies.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class ProductService {
@@ -27,12 +29,11 @@ public class ProductService {
         Company company = companyRepository.findByIdAndDeletedFalse(companyId)
                 .orElseThrow(() -> new IllegalArgumentException("해당 기업을 찾을 수 없습니다."));
 
-        int quantity = 0;
-        Stock stock = Stock.create(quantity);
+        Stock stock = Stock.create(0); // 초기 재고 0
+
         if (request.getStockQuantity() != null && request.getStockQuantity() > 0) {
             stock.inboundStock(request.getStockQuantity());
         }
-
 
         Product product = Product.create(
                 request.getCode(),
@@ -43,7 +44,8 @@ public class ProductService {
                 company,
                 stock
         );
-        return productRepository.save(product).getId();
+
+            return productRepository.save(product).getId();
     }
 
     // 제품 수정

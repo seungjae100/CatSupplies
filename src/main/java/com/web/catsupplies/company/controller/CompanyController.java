@@ -1,10 +1,9 @@
 package com.web.catsupplies.company.controller;
 
+import com.web.catsupplies.common.exception.AccessDeniedException;
 import com.web.catsupplies.common.jwt.CompanyDetails;
-import com.web.catsupplies.company.application.CompanyLoginRequest;
-import com.web.catsupplies.company.application.CompanyModifyRequest;
-import com.web.catsupplies.company.application.CompanyRegisterRequest;
-import com.web.catsupplies.company.application.CompanyService;
+import com.web.catsupplies.common.jwt.CookieUtils;
+import com.web.catsupplies.company.application.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -44,9 +43,9 @@ public class CompanyController {
             security = @SecurityRequirement(name = "") // JWT 인증 제외
     )
     @PostMapping("/login")
-    public ResponseEntity<String> login(@RequestBody @Valid CompanyLoginRequest request, HttpServletResponse response) {
-        companyService.login(request, response);
-        return ResponseEntity.ok("로그인이 완료되었습니다.");
+    public ResponseEntity<CompanyLoginResponse> login(@RequestBody @Valid CompanyLoginRequest request, HttpServletResponse response) {
+        CompanyLoginResponse companyLoginResponse = companyService.login(request, response);
+        return ResponseEntity.ok(companyLoginResponse);
     }
 
     // 정보 수정
@@ -69,7 +68,20 @@ public class CompanyController {
             security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
     )
     @PostMapping("/reAccessToken")
-    public ResponseEntity<String> reAccessToken(HttpServletRequest request, HttpServletResponse response) {
+    public ResponseEntity<String> reAccessToken(HttpServletRequest request,
+                                                HttpServletResponse response,
+                                                @RequestHeader(value = "Authorization", required = false) String authHeader) {
+        String expiredAccessToken = null;
+
+        // Swagger에서 Authorization 헤더로 토큰을 넘겼을 경우 처리
+        if (authHeader != null && authHeader.startsWith("Bearer ")) {
+            expiredAccessToken = authHeader.substring(7);
+        } else {
+            // 쿠키에서 AccessToken을 꺼내는 기존의 로직
+            expiredAccessToken = CookieUtils.getCookie(request, "accessToken")
+                    .orElseThrow(() -> new AccessDeniedException("AccessToken이 존재하지 않습니다."));
+        }
+
         companyService.reAccessToken(request, response);
         return ResponseEntity.ok("AccessToken이 재발급되었습니다.");
     }

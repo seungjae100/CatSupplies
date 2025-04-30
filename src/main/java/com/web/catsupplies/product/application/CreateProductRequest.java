@@ -18,8 +18,8 @@ public class CreateProductRequest {
     @Schema(description = "제품의 이름을 입력합니다.", example = "고양이사료굿")
     private String name;
 
-    @NotBlank(message = "제품가격을 입력해주세요.")
-    @Min(value = 100)
+
+    @Min(value = 100, message = "제품가격을 입력해주세요.")
     @Schema(description = "제품의 가격을 입력합니다.", example = "12,000원")
     private int price;
 
