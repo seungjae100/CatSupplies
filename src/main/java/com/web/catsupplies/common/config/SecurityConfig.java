@@ -50,12 +50,12 @@ public class SecurityConfig {
                         // User만 허용
                         .requestMatchers("/api/user/**").hasRole("USER")
 
-                        // 제품 조회는 모두 가능
-                        .requestMatchers("/api/products/list").hasAnyRole("USER", "COMPANY")
+                        // 제품 조회는 모두 가능 (비로그인도 가능)
+                        .requestMatchers("/api/products/list").permitAll()
 
                         // 제품 상세 조회는 구분
-                        .requestMatchers("/api/products/user/{productId}").hasRole("USER")
-                        .requestMatchers("/api/products/company/{productId}").hasRole("COMPANY")
+                        .requestMatchers("/api/products/user/**").hasRole("USER")
+                        .requestMatchers("/api/products/company/**").hasRole("COMPANY")
 
                         // 제품 등록, 수정, 삭제는 기업만
                         .requestMatchers("/api/products/create", "/api/products/update/**", "/api/products/delete").hasRole("COMPANY")

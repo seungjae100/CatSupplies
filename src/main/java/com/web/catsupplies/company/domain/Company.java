@@ -84,9 +84,6 @@ public class Company extends BaseTimeEntity {
 
     // 정보 수정에 필요한 메서드
     public void changePassword(String password) {
-        if (!password.matches(RegexPatterns.PASSWORD_PATTERN)) {
-            throw new IllegalArgumentException("비밀번호 형식이 유효하지 않습니다.");
-        }
         this.password = password;
     }
 

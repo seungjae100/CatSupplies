@@ -21,16 +21,16 @@ import java.util.List;
 @RequestMapping("/api/stocks/history")
 public class StockHistoryController {
 
-    private StockHistoryService stockHistoryService;
+    private final StockHistoryService stockHistoryService;
 
     // 재고 이력 조회
     @Operation(summary = "재고 이력 조회",
                description = "해당 제품의 재고 변경 이력을 조회합니다.",
                security = @SecurityRequirement(name = "jwtAuth"))
-    @GetMapping("/{productId}")
-    public ResponseEntity<List<StockHistoryResponse>> getStockHistory(@PathVariable Long productId,
+    @GetMapping("/bystock/{stockId}")
+    public ResponseEntity<List<StockHistoryResponse>> getStockHistory(@PathVariable Long stockId,
                                                                       @AuthenticationPrincipal CompanyDetails companyDetails) {
-        List<StockHistoryResponse> response = stockHistoryService.getHistory(productId, companyDetails.getCompanyId());
+        List<StockHistoryResponse> response = stockHistoryService.getHistory(stockId, companyDetails.getCompanyId());
         return ResponseEntity.ok(response);
     }
 }

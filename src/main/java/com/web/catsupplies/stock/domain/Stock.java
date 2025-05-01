@@ -43,7 +43,7 @@ public class Stock extends BaseTimeEntity {
     // 재고 변경이력을 자동으로 저장
     private void updateStockHistory(StockStatus status, int quantityChange) {
         StockHistory history = StockHistory.createHistory(this, status, quantityChange);
-        addStockHistory(history);
+        this.addStockHistory(history); // 양방향 연관관계 설정
     }
 
 

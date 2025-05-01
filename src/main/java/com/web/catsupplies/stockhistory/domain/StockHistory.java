@@ -40,9 +40,6 @@ public class StockHistory extends BaseTimeEntity {
         history.stockStatus = status;
         history.quantityChange = quantityChange;
 
-        // 연관관계 설정
-        stock.addStockHistory(history);
-
         return history;
     }
 }

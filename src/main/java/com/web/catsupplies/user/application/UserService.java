@@ -1,5 +1,6 @@
 package com.web.catsupplies.user.application;
 
+import com.web.catsupplies.common.constant.RegexPatterns;
 import com.web.catsupplies.common.exception.AccessDeniedException;
 import com.web.catsupplies.common.exception.NotFoundException;
 import com.web.catsupplies.common.jwt.CookieUtils;
@@ -12,6 +13,7 @@ import com.web.catsupplies.user.repository.UserRepository;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -73,6 +75,7 @@ public class UserService {
     }
 
     // 정보 수정
+    @Transactional
     public void modify(ModifyRequest request, Long userId, Long loginUserId) {
         // 로그인한 본인인지 확인
         if (!userId.equals(loginUserId)) {
@@ -84,12 +87,16 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("유저가 존재하지 않습니다."));
 
         // 정보 부분 수정 필드
-        if (request.getName() != null) {
-            user.changeName(request.getName());
-        }
 
         if (request.getPassword() != null) {
-            user.changePassword(request.getPassword());
+            if (!request.getPassword().matches(RegexPatterns.PASSWORD_PATTERN)) {
+                throw new IllegalArgumentException("비밀번호 형식이 올바르지 않습니다.");
+            }
+            user.changePassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        if (request.getName() != null) {
+            user.changeName(request.getName());
         }
 
         if (request.getPhone() != null) {
@@ -115,10 +122,11 @@ public class UserService {
     }
 
     // 사용자 탈퇴
+    @Transactional
     public void deleteUser(Long userId) {
 
         // 유저 정보가 데이터베이스에 저장되어 있는지 확인
-        User user = userRepository.findByIdAndDeletedFalse(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
 
         // 이미 유저가 탈퇴한 상황인지 확인

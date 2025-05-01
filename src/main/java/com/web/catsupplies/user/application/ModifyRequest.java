@@ -1,6 +1,8 @@
 package com.web.catsupplies.user.application;
 
+import com.web.catsupplies.common.constant.RegexPatterns;
 import io.swagger.v3.oas.annotations.media.Schema;
+import jakarta.validation.constraints.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;

@@ -18,7 +18,7 @@ public class StockHistoryResponse {
     @Schema(description = "변화하는 수량을 조회합니다.", example = "23 개")
     private int quantityChange;
 
-    @Schema(description = "재고변경일을 조회합니다.", example = "2025-04-17T05:00:15.687Z")
+    @Schema(description = "재고변경일을 조회합니다.")
     private LocalDateTime createdAt;
 
     public static StockHistoryResponse from(StockHistory stockHistory) {

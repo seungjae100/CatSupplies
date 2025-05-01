@@ -56,7 +56,7 @@ public class UserController {
             security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
     )
     @PatchMapping("/{userId}")
-    public ResponseEntity<String> modify(@RequestBody ModifyRequest request, @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long userId) {
+    public ResponseEntity<String> modify(@RequestBody @Valid ModifyRequest request, @AuthenticationPrincipal CustomUserDetails userDetails, @PathVariable Long userId) {
         userService.modify(request, userId, userDetails.getUserId());
         return ResponseEntity.ok().build();
     }

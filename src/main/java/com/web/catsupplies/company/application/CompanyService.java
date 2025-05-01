@@ -1,5 +1,6 @@
 package com.web.catsupplies.company.application;
 
+import com.web.catsupplies.common.constant.RegexPatterns;
 import com.web.catsupplies.common.exception.AccessDeniedException;
 import com.web.catsupplies.common.exception.NotFoundException;
 import com.web.catsupplies.common.jwt.CookieUtils;
@@ -80,7 +81,10 @@ public class CompanyService {
 
         // 정보 부분 수정
         if (request.getPassword() != null) {
-            company.changePassword(request.getPassword());
+            if (!request.getPassword().matches(RegexPatterns.PASSWORD_PATTERN)) {
+                throw new IllegalArgumentException("비밀번호 형식이 유효하지 않습니다.");
+            }
+            company.changePassword(passwordEncoder.encode(request.getPassword()));
         }
 
         if (request.getPhone() != null) {
@@ -118,10 +122,10 @@ public class CompanyService {
 
     // 기업 탈퇴
     @Transactional
-    public void deleteCompany(Long CompanyId) {
+    public void deleteCompany(Long companyId) {
 
         // 기업 정보가 데이터베이스에 저장되어 있는지 확인
-        Company company = companyRepository.findByIdAndDeletedFalse(CompanyId)
+        Company company = companyRepository.findByIdAndDeletedFalse(companyId)
                 .orElseThrow(() -> new NotFoundException("기업정보가 존재하지 않습니다."));
 
         // 이미 기업이 탈퇴한 상황

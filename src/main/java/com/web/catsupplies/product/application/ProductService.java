@@ -90,6 +90,10 @@ public class ProductService {
             throw new SecurityException("해당 제품을 삭제할 권한이 없습니다.");
         }
 
+        if (product.isDeleted()) {
+            throw new IllegalArgumentException("이미 삭제된 제품입니다.");
+        }
+
         product.remove();
     }
 

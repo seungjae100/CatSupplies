@@ -55,7 +55,7 @@ public class CompanyController {
             security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
     )
     @PatchMapping("/{companyId}")
-    public ResponseEntity<String> modify(@RequestBody CompanyModifyRequest request, @AuthenticationPrincipal CompanyDetails companyDetails, @PathVariable Long companyId) {
+    public ResponseEntity<String> modify(@Valid @RequestBody CompanyModifyRequest request, @AuthenticationPrincipal CompanyDetails companyDetails, @PathVariable Long companyId) {
         companyService.modify(request, companyId, companyDetails.getCompanyId());
         return ResponseEntity.ok().build();
     }
