@@ -4,22 +4,16 @@ import com.web.catsupplies.common.constant.RegexPatterns;
 import com.web.catsupplies.common.exception.AccessDeniedException;
 import com.web.catsupplies.common.exception.NotFoundException;
 import com.web.catsupplies.common.jwt.CookieUtils;
-import com.web.catsupplies.common.jwt.JwtTokenProvider;
-import com.web.catsupplies.user.domain.RefreshToken;
-import com.web.catsupplies.user.domain.Role;
 import com.web.catsupplies.user.domain.User;
-import com.web.catsupplies.user.repository.RefreshTokenRepository;
 import com.web.catsupplies.user.repository.UserRepository;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.transaction.Transactional;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.util.WebUtils;
+
 
 @Validated
 @Service
@@ -106,6 +100,12 @@ public class UserService {
         if (request.getAddress() != null) {
             user.changeAddress(request.getAddress());
         }
+    }
+    @Transactional(readOnly = true)
+    public UserResponse getUser(Long userId) {
+        User user = userRepository.findByIdAndDeletedFalse(userId)
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
+        return UserResponse.from(user);
     }
 
     // AccessToken 재발급

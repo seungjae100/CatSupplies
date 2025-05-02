@@ -37,11 +37,11 @@ public class Order extends BaseTimeEntity {
     private int totalPrice;
 
     // 주문 제품 상세
-    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "order", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
     private List<OrderItem> orderItems = new ArrayList<>();
 
     // 결제와의 조인 메서드
-    @OneToOne(mappedBy = "order", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "order")
     private Payment payment;
 
 

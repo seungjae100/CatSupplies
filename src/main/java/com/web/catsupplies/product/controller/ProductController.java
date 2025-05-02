@@ -67,7 +67,7 @@ public class ProductController {
 
     // 제품 목록 조회 ( 기업 )
     @Operation(
-            summary = "제품목록조회",
+            summary = "제품목록조회(기업)",
             description = "JWT 인증필요, 기업 제품 목록 조회 가능, 사용자 조회 가능(홈페이지)",
             security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
     )

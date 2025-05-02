@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface ProductRepository extends JpaRepository<Product, Long> {
+public interface ProductRepository extends JpaRepository<Product, Long>, ProductRepositoryCustom {
 
     // 삭제된 제품 제외하고 제품의 기본키 조회
     Optional<Product> findByIdAndDeletedFalse(Long productId);

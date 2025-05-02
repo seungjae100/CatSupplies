@@ -108,6 +108,14 @@ public class CompanyService {
         }
     }
 
+    // 회사 정보 조회
+    @Transactional(readOnly = true)
+    public CompanyResponse getCompany(Long companyId) {
+        Company company = companyRepository.findByIdAndDeletedFalse(companyId)
+                .orElseThrow(() -> new NotFoundException("회사를 찾을 수 없습니다."));
+        return CompanyResponse.from(company);
+    }
+
     // AccessToken 재발급
     public void reAccessToken(HttpServletRequest request, HttpServletResponse response) {
         String expiredToken = CookieUtils.getCookie(request, "accessToken")

@@ -8,7 +8,6 @@ import com.web.catsupplies.stock.domain.Stock;
 import com.web.catsupplies.product.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -108,10 +107,10 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    // 제품 목록 조회 ( 사용자 )
+    // 제품 목록 조회 ( 로그인, 비로그인 )
     @Transactional(readOnly = true)
     public List<ProductListResponse> getAllProducts() {
-        List<Product> products = productRepository.findAllByDeletedFalse();
+        List<Product> products = productRepository.findAllAvailableProducts();
         return products.stream()
                 .map(ProductListResponse::from)
                 .collect(Collectors.toList());

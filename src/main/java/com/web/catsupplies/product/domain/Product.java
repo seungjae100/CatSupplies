@@ -6,12 +6,13 @@ import com.web.catsupplies.user.domain.BaseTimeEntity;
 import jakarta.persistence.*;
 import lombok.*;
 
-@Entity
+
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(name = "product")
+@Entity
 public class Product extends BaseTimeEntity {
 
 

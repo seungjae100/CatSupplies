@@ -61,6 +61,19 @@ public class UserController {
         return ResponseEntity.ok().build();
     }
 
+    // 사용자 정보 조회
+    @Operation(
+            summary = "사용자정보조회",
+            description = "JWT",
+            security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
+    )
+    @GetMapping("/profile")
+    public ResponseEntity<UserResponse> getUesr(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        Long userId = userDetails.getUserId();
+        UserResponse userResponse = userService.getUser(userId);
+        return ResponseEntity.ok(userResponse);
+    }
+
     // 재발급토큰
     @Operation(
             summary = "AccessToken 재발급",

@@ -60,6 +60,18 @@ public class CompanyController {
         return ResponseEntity.ok().build();
     }
 
+    // 정보 조회
+    @Operation(
+            summary = "정보조회",
+            description = "JWT",
+            security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
+    )
+    @GetMapping("/profile")
+    public ResponseEntity<CompanyResponse> getCompany(@AuthenticationPrincipal CompanyDetails companyDetails) {
+        Long companyId = companyDetails.getCompanyId();
+        CompanyResponse response = companyService.getCompany(companyId);
+        return ResponseEntity.ok(response);
+    }
 
     // 재발급토큰
     @Operation(
