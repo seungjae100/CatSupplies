@@ -1,23 +1,19 @@
 package com.web.catsupplies.user.application;
 
+import com.web.catsupplies.common.constant.RegexPatterns;
 import com.web.catsupplies.common.exception.AccessDeniedException;
 import com.web.catsupplies.common.exception.NotFoundException;
 import com.web.catsupplies.common.jwt.CookieUtils;
-import com.web.catsupplies.common.jwt.JwtTokenProvider;
-import com.web.catsupplies.user.domain.RefreshToken;
-import com.web.catsupplies.user.domain.Role;
 import com.web.catsupplies.user.domain.User;
-import com.web.catsupplies.user.repository.RefreshTokenRepository;
 import com.web.catsupplies.user.repository.UserRepository;
-import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.util.WebUtils;
+
 
 @Validated
 @Service
@@ -50,7 +46,7 @@ public class UserService {
     }
 
     // 로그인
-    public void login(LoginRequest request, HttpServletResponse response) {
+    public LoginResponse login(LoginRequest request, HttpServletResponse response) {
 
         User user = userRepository.findByEmailAndDeletedFalse(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("이메일을 찾을 수 없습니다."));
@@ -68,9 +64,12 @@ public class UserService {
         // AccessToken HttpOnly 쿠키에 저장
         CookieUtils.setCookie(response, "accessToken", accessToken, 60 * 60); // 1 시간
 
+        return new LoginResponse(accessToken);
+
     }
 
     // 정보 수정
+    @Transactional
     public void modify(ModifyRequest request, Long userId, Long loginUserId) {
         // 로그인한 본인인지 확인
         if (!userId.equals(loginUserId)) {
@@ -82,12 +81,16 @@ public class UserService {
                 .orElseThrow(() -> new NotFoundException("유저가 존재하지 않습니다."));
 
         // 정보 부분 수정 필드
-        if (request.getName() != null) {
-            user.changeName(request.getName());
-        }
 
         if (request.getPassword() != null) {
-            user.changePassword(request.getPassword());
+            if (!request.getPassword().matches(RegexPatterns.PASSWORD_PATTERN)) {
+                throw new IllegalArgumentException("비밀번호 형식이 올바르지 않습니다.");
+            }
+            user.changePassword(passwordEncoder.encode(request.getPassword()));
+        }
+
+        if (request.getName() != null) {
+            user.changeName(request.getName());
         }
 
         if (request.getPhone() != null) {
@@ -97,6 +100,12 @@ public class UserService {
         if (request.getAddress() != null) {
             user.changeAddress(request.getAddress());
         }
+    }
+    @Transactional(readOnly = true)
+    public UserResponse getUser(Long userId) {
+        User user = userRepository.findByIdAndDeletedFalse(userId)
+                .orElseThrow(() -> new NotFoundException("사용자를 찾을 수 없습니다."));
+        return UserResponse.from(user);
     }
 
     // AccessToken 재발급
@@ -113,10 +122,11 @@ public class UserService {
     }
 
     // 사용자 탈퇴
+    @Transactional
     public void deleteUser(Long userId) {
 
         // 유저 정보가 데이터베이스에 저장되어 있는지 확인
-        User user = userRepository.findByIdAndDeletedFalse(userId)
+        User user = userRepository.findById(userId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
 
         // 이미 유저가 탈퇴한 상황인지 확인

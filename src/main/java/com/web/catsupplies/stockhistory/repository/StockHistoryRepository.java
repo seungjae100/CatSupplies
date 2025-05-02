@@ -9,5 +9,5 @@ import java.util.List;
 @Repository
 public interface StockHistoryRepository extends JpaRepository<StockHistory, Long> {
     // 제품의 모든 재고 기록을 조회한다.
-    List<StockHistory> findAllByStockProductIdOrderByCreatedAtDesc(Long productId);
+    List<StockHistory> findAllByStock_IdOrderByCreatedAtDesc(Long stockId);
 }

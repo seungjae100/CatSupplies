@@ -42,13 +42,12 @@ public class Payment extends BaseTimeEntity {
 
     // 결제 생성
     public static Payment create(Order order, int amount) {
-        Payment payment = Payment.builder()
-                .order(order)
-                .amount(amount)
-                .paymentStatus(PaymentStatus.READY)
-                .build();
-        payment.setOrder(order);
-        return payment;
+        Payment payment = new Payment();
+                payment.order = order;
+                payment.amount = amount;
+                payment.paymentStatus = PaymentStatus.READY;
+                payment.setOrder(order);
+            return payment;
     }
 
     // 결제 성공
@@ -59,7 +58,7 @@ public class Payment extends BaseTimeEntity {
 
     // 결제 취소
     public void cancel() {
-        this.paymentStatus = PaymentStatus.FAILED;
+        this.paymentStatus = PaymentStatus.CANCEL;
     }
 
 

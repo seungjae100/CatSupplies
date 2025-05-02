@@ -9,6 +9,8 @@ import lombok.Getter;
 @Builder
 public class ProductListResponse {
     // 제품 리스트
+    @Schema(description = "Swagger 테스트의 편의성을 높이기 위한 id 노출")
+    private Long productId;
 
     @Schema(description = "제품의 이름을 조회합니다.", example = "고양이사료굿")
     private String name;
@@ -21,6 +23,7 @@ public class ProductListResponse {
 
     public static ProductListResponse from(Product product) {
         return ProductListResponse.builder()
+                .productId(product.getId())
                 .name(product.getName())
                 .price(product.getPrice())
                 .imgUrl(product.getImgUrl())

@@ -1,6 +1,5 @@
 package com.web.catsupplies.company.domain;
 
-import com.web.catsupplies.common.constant.RegexPatterns;
 import com.web.catsupplies.product.domain.Product;
 import com.web.catsupplies.user.domain.BaseTimeEntity;
 import com.web.catsupplies.user.domain.Role;
@@ -10,12 +9,13 @@ import lombok.*;
 import java.util.ArrayList;
 import java.util.List;
 
-@Entity
+
 @Getter
 @Builder
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Table(name = "companies")
+@Entity
 public class Company extends BaseTimeEntity {
 
     // 기본키
@@ -78,14 +78,12 @@ public class Company extends BaseTimeEntity {
                 .companyName(companyName)
                 .boss(boss)
                 .licenseNumber(licenseNumber)
+                .role(Role.COMPANY)
                 .build();
     }
 
     // 정보 수정에 필요한 메서드
     public void changePassword(String password) {
-        if (!password.matches(RegexPatterns.PASSWORD_PATTERN)) {
-            throw new IllegalArgumentException("비밀번호 형식이 유효하지 않습니다.");
-        }
         this.password = password;
     }
 

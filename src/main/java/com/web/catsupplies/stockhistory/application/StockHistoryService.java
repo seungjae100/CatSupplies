@@ -16,12 +16,12 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class StockHistoryService {
 
-    private StockHistoryRepository stockHistoryRepository;
-    private StockRepository stockRepository;
+    private final StockHistoryRepository stockHistoryRepository;
+    private final StockRepository stockRepository;
 
     @Transactional(readOnly = true)
-    public List<StockHistoryResponse> getHistory(Long productId, Long companyId) {
-        Stock stock = stockRepository.findByProductId(productId)
+    public List<StockHistoryResponse> getHistory(Long stockId, Long companyId) {
+        Stock stock = stockRepository.findById(stockId)
                 .orElseThrow(() -> new NotFoundException("해당 제품이 존재하지 않습니다."));
 
         if (!stock.getProduct().getCompany().getId().equals(companyId)) {
@@ -29,7 +29,7 @@ public class StockHistoryService {
         }
 
         List<StockHistory> histories =
-                stockHistoryRepository.findAllByStockProductIdOrderByCreatedAtDesc(productId);
+                stockHistoryRepository.findAllByStock_IdOrderByCreatedAtDesc(stockId);
 
         return histories.stream()
                 .map(StockHistoryResponse::from)

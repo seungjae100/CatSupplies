@@ -37,12 +37,25 @@ public class SecurityConfig {
                                 "/swagger-resources/**",
                                 "/webjars/**"
                         ).permitAll()
-                            // 회원가입, 로그인 허용
+                        // 회원가입, 로그인 허용
                         .requestMatchers("/api/user/register",  "/api/user/login",
                                         "/api/company/register", "/api/company/login").permitAll()
 
-                        // 제품 조회는 모두 가능
-                        .requestMatchers("/api/products/", "/api/products/**").hasAnyRole("USER", "COMPANY")
+                        // 재발급 권한 허용
+                        .requestMatchers("/api/company/reAccessToken", "/api/user/reAccessToken").permitAll()
+
+                        // Company만 허용
+                        .requestMatchers("/api/company/**").hasRole("COMPANY")
+
+                        // User만 허용
+                        .requestMatchers("/api/user/**").hasRole("USER")
+
+                        // 제품 조회는 모두 가능 (비로그인도 가능)
+                        .requestMatchers("/api/products/all/list").permitAll()
+
+                        // 제품 상세 조회는 구분
+                        .requestMatchers("/api/products/user/**").hasRole("USER")
+                        .requestMatchers("/api/products/company/**").hasRole("COMPANY")
 
                         // 제품 등록, 수정, 삭제는 기업만
                         .requestMatchers("/api/products/create", "/api/products/update/**", "/api/products/delete").hasRole("COMPANY")
@@ -51,7 +64,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/orders/**").hasRole("USER")
 
                         // 결제도 사용자만
-                        .requestMatchers("/api/payments/** ").hasRole("USER")
+                        .requestMatchers("/api/payments/**").hasRole("USER")
 
                         // 재고 조작은 기업만 가능
                         .requestMatchers("/api/stocks/**").hasRole("COMPANY")

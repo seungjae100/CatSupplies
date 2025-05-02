@@ -1,5 +1,6 @@
 package com.web.catsupplies.company.application;
 
+import com.web.catsupplies.common.constant.RegexPatterns;
 import com.web.catsupplies.common.exception.AccessDeniedException;
 import com.web.catsupplies.common.exception.NotFoundException;
 import com.web.catsupplies.common.jwt.CookieUtils;
@@ -33,7 +34,7 @@ public class CompanyService {
 
         Company company = Company.create(
                 request.getEmail(),
-                request.getPassword(),
+                passwordEncoder.encode(request.getPassword()),
                 request.getPhone(),
                 request.getAddress(),
                 request.getCompanyName(),
@@ -45,7 +46,7 @@ public class CompanyService {
     }
 
     // 로그인
-    public void login(CompanyLoginRequest request, HttpServletResponse response) {
+    public CompanyLoginResponse login(CompanyLoginRequest request, HttpServletResponse response) {
 
         Company company = companyRepository.findByEmailAndDeletedFalse(request.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("잘못된 이메일입니다."));
@@ -55,13 +56,15 @@ public class CompanyService {
         }
 
         // JWT 발급
-        String accessToken = jwtTokenProvider.createAccessToken(company.getEmail(), Role.COMPANY.name());
-        String refreshToken = jwtTokenProvider.createRefreshToken(company.getEmail(), Role.COMPANY.name());
+        String accessToken = jwtTokenProvider.createAccessToken(company.getEmail(), "ROLE_COMPANY");
+        String refreshToken = jwtTokenProvider.createRefreshToken(company.getEmail(), "ROLE_COMPANY");
 
         // RefreshToken 을 Redis 에 저장
         tokenService.RedisSaveRefreshToken(company.getEmail(), refreshToken);
         // AccessToken HttpOnly 쿠키에 저장
         CookieUtils.setCookie(response, "accessToken", accessToken, 60 * 60);
+
+        return new CompanyLoginResponse(accessToken);
 
     }
 
@@ -78,7 +81,10 @@ public class CompanyService {
 
         // 정보 부분 수정
         if (request.getPassword() != null) {
-            company.changePassword(request.getPassword());
+            if (!request.getPassword().matches(RegexPatterns.PASSWORD_PATTERN)) {
+                throw new IllegalArgumentException("비밀번호 형식이 유효하지 않습니다.");
+            }
+            company.changePassword(passwordEncoder.encode(request.getPassword()));
         }
 
         if (request.getPhone() != null) {
@@ -102,6 +108,14 @@ public class CompanyService {
         }
     }
 
+    // 회사 정보 조회
+    @Transactional(readOnly = true)
+    public CompanyResponse getCompany(Long companyId) {
+        Company company = companyRepository.findByIdAndDeletedFalse(companyId)
+                .orElseThrow(() -> new NotFoundException("회사를 찾을 수 없습니다."));
+        return CompanyResponse.from(company);
+    }
+
     // AccessToken 재발급
     public void reAccessToken(HttpServletRequest request, HttpServletResponse response) {
         String expiredToken = CookieUtils.getCookie(request, "accessToken")
@@ -116,10 +130,10 @@ public class CompanyService {
 
     // 기업 탈퇴
     @Transactional
-    public void deleteCompany(Long CompanyId) {
+    public void deleteCompany(Long companyId) {
 
         // 기업 정보가 데이터베이스에 저장되어 있는지 확인
-        Company company = companyRepository.findByIdAndDeletedFalse(CompanyId)
+        Company company = companyRepository.findByIdAndDeletedFalse(companyId)
                 .orElseThrow(() -> new NotFoundException("기업정보가 존재하지 않습니다."));
 
         // 이미 기업이 탈퇴한 상황

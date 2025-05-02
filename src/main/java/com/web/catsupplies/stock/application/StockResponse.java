@@ -9,6 +9,9 @@ import lombok.Getter;
 @Getter
 public class StockResponse {
 
+    @Schema(description = "재고 고유 ID", example = "4")
+    private Long stockId;
+
     @Schema(description = "제품의 코드를 조회합니다.", example = "PRO-002")
     private Long productId;
 
@@ -17,6 +20,7 @@ public class StockResponse {
 
     public static StockResponse from(Stock stock) {
         return StockResponse.builder()
+                .stockId(stock.getId())
                 .productId(stock.getProduct().getId())
                 .quantity(stock.getQuantity())
                 .build();

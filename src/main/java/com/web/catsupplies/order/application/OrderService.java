@@ -33,16 +33,24 @@ public class OrderService {
         Product product = productRepository.findById(request.getProductId())
                 .orElseThrow(() -> new IllegalArgumentException("제품이 존재하지 않습니다."));
 
+        // 재고 확인
+        int currentQuantity = product.getStock().getQuantity();
+        int orderQuantity = request.getQuantity();
+
+        if (currentQuantity < orderQuantity) {
+            throw new IllegalArgumentException("재고가 부족합니다.");
+        }
+
+        // 재고 차감
+        product.getStock().outboundStock(orderQuantity);
+
+        // 품절 상태 적용
+        if (currentQuantity - orderQuantity == 0) {
+            product.getStock().soldOut();
+        }
+
         OrderItem orderItem = OrderItem.of(product, request.getQuantity());
-
-        Order order = Order.builder()
-                .user(user)
-                .orderStatus(OrderStatus.PENDING)
-                .totalPrice(orderItem.getTotalPrice())
-                .build();
-
-        order.addOrderItem(orderItem);
-
+        Order order = Order.create(user, orderItem);
         orderRepository.save(order);
     }
 
@@ -60,6 +68,13 @@ public class OrderService {
         // 이미 결제 되었거나 취소된 주문은 취소가 불가
         if (order.getOrderStatus() != OrderStatus.PENDING) {
             throw new IllegalArgumentException("이미 결제 되었거나 취소된 주문입니다.");
+        }
+
+        // 재고 복원
+        for (OrderItem item : order.getOrderItems()) {
+            Product product = item.getProduct();
+            int quantity = item.getQuantity();
+            product.getStock().increaseStock(quantity);
         }
 
         // 취소로 상태 변경
