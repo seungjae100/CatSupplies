@@ -78,9 +78,6 @@ public class Stock extends BaseTimeEntity {
 
     // 재고 감소
     public void decreaseStock(int amount) {
-        if (this.quantity < amount) {
-            throw new IllegalArgumentException("재고가 부족합니다.");
-        }
         this.quantity -= amount;
         updateStockHistory(StockStatus.STOCK_DECREASED, -amount);
     }
@@ -93,9 +90,6 @@ public class Stock extends BaseTimeEntity {
 
     // 재고 출고 처리
     public void outboundStock(int amount) {
-        if (this.quantity < amount) {
-            throw new IllegalArgumentException("출고할 재고가 부족합니다.");
-        }
         this.quantity -= amount;
         updateStockHistory(StockStatus.OUTBOUND, -amount);
     }

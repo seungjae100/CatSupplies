@@ -19,4 +19,6 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     // 삭제된 제품을 제외하고 중복된 코드가 있는지 조회
     boolean existsByCodeAndDeletedFalse(String code);
 
+    // 삭제된 제품 제외하고 제품 전체조회 사용자 포함
+    List<Product> findAllByDeletedFalse();
 }

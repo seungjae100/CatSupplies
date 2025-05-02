@@ -65,7 +65,7 @@ public class ProductController {
         return ResponseEntity.ok(Map.of("message", "제품이 삭제되었습니다."));
     }
 
-    // 제품 목록 조회
+    // 제품 목록 조회 ( 기업 )
     @Operation(
             summary = "제품목록조회",
             description = "JWT 인증필요, 기업 제품 목록 조회 가능, 사용자 조회 가능(홈페이지)",
@@ -75,6 +75,18 @@ public class ProductController {
     public ResponseEntity<List<ProductListResponse>> getProductsByCompany(@AuthenticationPrincipal CompanyDetails companyDetails) {
         Long companyId = companyDetails.getCompanyId();
         List<ProductListResponse> products = productService.getProductsByCompany(companyId);
+        return ResponseEntity.ok(products);
+    }
+
+    // 제품목록 전체 조회 ( 로그인, 비로그인 )
+    @Operation(
+            summary = "제품목록 전체 조회",
+            description = "JWT 없이 사용가능",
+            security = @SecurityRequirement(name = "") // JWT 인증 제외
+    )
+    @GetMapping("/all/list")
+    public ResponseEntity<List<ProductListResponse>> getAllProducts() {
+        List<ProductListResponse> products = productService.getAllProducts();
         return ResponseEntity.ok(products);
     }
 

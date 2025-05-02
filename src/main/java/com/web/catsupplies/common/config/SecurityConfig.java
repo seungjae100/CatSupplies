@@ -51,7 +51,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/user/**").hasRole("USER")
 
                         // 제품 조회는 모두 가능 (비로그인도 가능)
-                        .requestMatchers("/api/products/list").permitAll()
+                        .requestMatchers("/api/products/all/list").permitAll()
 
                         // 제품 상세 조회는 구분
                         .requestMatchers("/api/products/user/**").hasRole("USER")
