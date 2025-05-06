@@ -99,6 +99,7 @@ class UserServiceTest {
         ReflectionTestUtils.setField(user, "id", 1L);
 
         when(userRepository.findByIdAndDeletedFalse(userId)).thenReturn(Optional.of(user));
+        when(passwordEncoder.encode(anyString())).thenReturn("Password0000*");
 
         userSerivce.modify(request, userId, loginUserId);
 

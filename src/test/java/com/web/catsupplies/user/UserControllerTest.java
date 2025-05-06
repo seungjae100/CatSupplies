@@ -3,10 +3,7 @@ package com.web.catsupplies.user;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.web.catsupplies.common.config.SecurityTestConfig;
 import com.web.catsupplies.common.jwt.CustomUserDetails;
-import com.web.catsupplies.user.application.LoginRequest;
-import com.web.catsupplies.user.application.ModifyRequest;
-import com.web.catsupplies.user.application.RegisterRequest;
-import com.web.catsupplies.user.application.UserService;
+import com.web.catsupplies.user.application.*;
 import com.web.catsupplies.user.controller.UserController;
 import com.web.catsupplies.user.domain.User;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,6 +26,7 @@ import org.springframework.test.web.servlet.MockMvc;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
@@ -57,15 +55,17 @@ class UserControllerTest {
         // given
         LoginRequest loginRequest = new LoginRequest("test@gmail.com", "Password1234*");
 
-        // userService.login (Void 반환)
-        doNothing().when(userService).login(any(), any());
+        LoginResponse loginResponse = new LoginResponse("accessToken");
+
+        when(userService.login(any(LoginRequest.class), any(HttpServletResponse.class)))
+                .thenReturn(loginResponse);
 
         // when & then
         mockMvc.perform(post("/api/user/login")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(loginRequest)))
                 .andExpect(status().isOk())
-                .andExpect(content().string("로그인이 완료되었습니다."));
+                .andExpect(content().json(objectMapper.writeValueAsString(loginResponse)));
     }
 
     @Test

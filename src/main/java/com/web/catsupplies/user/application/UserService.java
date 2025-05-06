@@ -126,13 +126,8 @@ public class UserService {
     public void deleteUser(Long userId) {
 
         // 유저 정보가 데이터베이스에 저장되어 있는지 확인
-        User user = userRepository.findById(userId)
+        User user = userRepository.findByIdAndDeletedFalse(userId)
                 .orElseThrow(() -> new NotFoundException("존재하지 않는 유저입니다."));
-
-        // 이미 유저가 탈퇴한 상황인지 확인
-        if (user.isDeleted()) {
-            throw new IllegalArgumentException("이미 탈퇴한 유저입니다.");
-        }
 
         user.remove();
     }

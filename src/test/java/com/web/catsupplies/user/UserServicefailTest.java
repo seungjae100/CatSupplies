@@ -120,20 +120,6 @@ public class UserServicefailTest {
         });
     }
 
-    @Test
-    @DisplayName("탈퇴 실패 - 이미 탈퇴한 유저인 경우")
-    void deleteUser_fail_alreadyDeleted() {
-        Long userId = 1L;
-        User user = User.create("test@gmail.com", "홍길동", "Password1234*", "01012341234", "서울");
-
-        user.remove(); // deleted = true 처리 이미 탈퇴한
-        when(userRepository.findByIdAndDeletedFalse(userId)).thenReturn(Optional.of(user));
-
-        assertThrows(IllegalArgumentException.class, () -> {
-            userSerivce.deleteUser(userId);
-        });
-    }
-
     // -------
     // 토큰 관련 실패
 
