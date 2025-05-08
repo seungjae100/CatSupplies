@@ -1,6 +1,9 @@
 # 1. Java 17
 FROM openjdk:17-jdk-slim
 
+# 1-1. netcat(nc) 설치 추가
+RUN apt-get update && apt-get install -y netcat && rm -rf /var/lib/apt/lists/*
+
 # 2. JAR 파일 경로 설정 (Maven은 target 디렉토리에 jar 생성됨)
 ARG JAR_FILE=target/*.jar
 
