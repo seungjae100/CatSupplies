@@ -2,16 +2,17 @@ package com.web.catsupplies.user.application;
 
 import com.web.catsupplies.common.jwt.CookieUtils;
 import com.web.catsupplies.common.jwt.JwtTokenProvider;
-import com.web.catsupplies.user.domain.RefreshToken;
 import com.web.catsupplies.user.domain.Role;
-import com.web.catsupplies.user.repository.RefreshTokenRepository;
 import io.jsonwebtoken.Claims;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.Duration;
 import java.util.Optional;
 
 
@@ -20,7 +21,10 @@ import java.util.Optional;
 public class TokenService {
 
     private final JwtTokenProvider jwtTokenProvider;
-    private final RefreshTokenRepository refreshTokenRepository;
+    private final RedisTemplate<String, String> redisTemplate;
+
+    @Value("${jwt.refresh-token-expiration}")
+    private long refreshTokenExpiration;
 
     // AccessToken 생성 ( 쿠키용 )
     public String createAccessToken(String email, Role role) {
@@ -32,10 +36,14 @@ public class TokenService {
         return jwtTokenProvider.createRefreshToken(email, "ROLE_" +role.name());
     }
 
-    // RefreshToken 을 Redis 에 저장
+    // RefreshToken 을 Redis 에 저장  (TTL 적용)
     @Transactional
     public void RedisSaveRefreshToken(String email, String refreshToken) {
-        refreshTokenRepository.save(new RefreshToken(email, refreshToken));
+        redisTemplate.opsForValue().set(
+                "RT:" + email,
+                refreshToken,
+                Duration.ofMillis(refreshTokenExpiration)
+        );
     }
 
     // 재발급
@@ -76,15 +84,18 @@ public class TokenService {
     }
 
     // RefreshToken 검증
-    public boolean validateRefreshToken(String refreshToken) {
-        return jwtTokenProvider.validateToken(refreshToken);
+    public boolean validateRefreshToken(String token) {
+        return jwtTokenProvider.validateToken(token);
     }
 
     // 이메일에서 저장된 RefreshToken 가져오기
     public String getStoredRefreshToken(String email) {
-        return refreshTokenRepository.findById(email)
-                .map(RefreshToken::getRefreshToken)
-                .orElse(null);
+        return redisTemplate.opsForValue().get("RT:" + email);
+    }
+
+    // RefreshToken 삭제
+    public void deleteRefreshToken(String email) {
+        redisTemplate.delete("RT:" + email);
     }
 
     // RefreshToken 삭제 ( 로그아웃 )
@@ -112,7 +123,7 @@ public class TokenService {
         // RefreshToken 조회 및 검증
         String refreshToken = getStoredRefreshToken(email);
         if (refreshToken != null && validateRefreshToken(refreshToken)) {
-            refreshTokenRepository.deleteById(email);
+            deleteRefreshToken(email);
         }
         // AccessToken 쿠키 삭제
         CookieUtils.deleteCookie(response, "accessToken");
