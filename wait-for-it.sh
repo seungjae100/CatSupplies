@@ -2,7 +2,9 @@
 # shellcheck disable=SC1128
 
 
-host="$1"
+# host와 port 분리
+HOST=$(echo "$1" | cut -d: -f1)
+PORT=$(echo "$1" | cut -d: -f2)
 shift
 cmd="$@"
 
