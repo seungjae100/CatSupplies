@@ -6,7 +6,6 @@
 HOST=$(echo "$1" | cut -d: -f1)
 PORT=$(echo "$1" | cut -d: -f2)
 shift
-cmd="$@"
 
 until nc -z "$HOST" "$PORT"; do
   >&2 echo "$HOST:$PORT 사용할 수 있기를 기다리고 있습니다 .."
@@ -14,4 +13,4 @@ until nc -z "$HOST" "$PORT"; do
 done
 
 >&2 echo "$HOST:$PORT 가 UP- 실행 명령입니다"
-exec $cmd
+exec "$@"
