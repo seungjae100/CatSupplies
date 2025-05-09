@@ -15,4 +15,4 @@ RUN chmod +x /wait-for-it.sh
 COPY ${JAR_FILE} app.jar
 
 # 5. wait-for-it.sh를 통해 DB가 떠 있는지 확인하고 Spring Boot 실행
-ENTRYPOINT ["/wait-for-it.sh", "db:3306", "--", "java", "-jar", "/app.jar"]
+ENTRYPOINT ["/wait-for-it.sh", "db:3306", "java", "-jar", "/app.jar"]
