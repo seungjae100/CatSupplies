@@ -7,6 +7,11 @@ HOST=$(echo "$1" | cut -d: -f1)
 PORT=$(echo "$1" | cut -d: -f2)
 shift
 
+# -- 제거
+if [ "$1" = "--" ]; then
+  shift
+fi
+
 until nc -z "$HOST" "$PORT"; do
   >&2 echo "$HOST:$PORT 사용할 수 있기를 기다리고 있습니다 .."
   sleep 1
