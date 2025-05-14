@@ -8,7 +8,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 
 @Configuration
-@Profile("dev")
+@Profile("prod")
 @OpenAPIDefinition(
         info = @Info(title = "냥이와 API 명세서", version = "v1", description = "JWT 기반 인증 시스템")
 )
@@ -18,5 +18,5 @@ import org.springframework.context.annotation.Profile;
         scheme = "bearer",                // Bearer 방식
         bearerFormat = "JWT"              // 형식 명시
 )
-public class SwaggerConfig {
+public class SwaggerProdConfig {
 }
