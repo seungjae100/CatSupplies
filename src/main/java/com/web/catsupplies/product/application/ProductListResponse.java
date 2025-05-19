@@ -15,10 +15,10 @@ public class ProductListResponse {
     @Schema(description = "제품의 이름을 조회합니다.", example = "고양이사료굿")
     private String name;
 
-    @Schema(description = "제품의 가격을 조회합니다.", example = "12,000원")
+    @Schema(description = "제품의 가격을 조회합니다.", example = "12000")
     private int price;
 
-    @Schema(description = "제품의 이미지를 조회합니다.", example = "https:imgfewagjealo213152")
+    @Schema(description = "제품의 이미지를 조회합니다.", example = "https://imgtest")
     private String imgUrl;
 
     public static ProductListResponse from(Product product) {

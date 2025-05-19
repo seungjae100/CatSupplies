@@ -17,7 +17,7 @@ public class LoginRequest {
 
     @NotBlank(message = "이메일을 입력해주세요.")
     @Email
-    @Schema(description = "이메일을 입력합니다.", example = "test@gmail.com")
+    @Schema(description = "이메일을 입력합니다.", example = "user@gmail.com")
     private String email;
 
     @NotBlank(message = "비밀번호를 입력해주세요")

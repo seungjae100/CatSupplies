@@ -11,10 +11,10 @@ import java.time.LocalDateTime;
 @Builder
 public class OrderListResponse {
 
-    @Schema(description = "주문한 제품의 기본키를 나타냅니다.", example = "125")
+    @Schema(description = "주문한 제품의 기본키를 나타냅니다.")
     private Long orderId; // 주문
 
-    @Schema(description = "주문한 제품의 총 가격을 나타냅니다.", example = "235,000원")
+    @Schema(description = "주문한 제품의 총 가격을 나타냅니다.", example = "235000")
     private int totalPrice; // 총 가격 합계
 
     @Schema(description = "주문의 상태를 나타냅니다.", example = "PAID")

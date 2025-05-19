@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class CreateProductRequest {
 
     @NotBlank(message = "제품코드를 입력해주세요.")
-    @Schema(description = "제품의 코드를 입력합니다.", example = "PRO-002")
+    @Schema(description = "제품의 코드를 입력합니다.", example = "TEST-001")
     private String code;
 
     @NotBlank(message = "제품이름를 입력해주세요.")
@@ -20,11 +20,11 @@ public class CreateProductRequest {
 
 
     @Min(value = 100, message = "제품가격을 입력해주세요.")
-    @Schema(description = "제품의 가격을 입력합니다.", example = "12,000원")
+    @Schema(description = "제품의 가격을 입력합니다.", example = "12000")
     private int price;
 
     @NotBlank(message = "제품이미지를 넣어주세요.")
-    @Schema(description = "제품의 이미지URL을 입력합니다.", example = "https:imgfewagjealo213152")
+    @Schema(description = "제품의 이미지URL을 입력합니다.", example = "https://imgtest")
     private String imgUrl;
 
     @NotBlank(message = "제품설명을 입력해주세요.")
@@ -32,6 +32,6 @@ public class CreateProductRequest {
     private String description;
 
     @Min(value = 0, message = "재고 수량은 0 이상이여야 합니다.")
-    @Schema(description = "입고수량을 입력합니다.", example = "100 개")
+    @Schema(description = "입고수량을 입력합니다.", example = "100")
     private Integer stockQuantity;
 }

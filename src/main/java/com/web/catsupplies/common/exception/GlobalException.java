@@ -25,11 +25,10 @@ public class GlobalException {
     }
 
     // 403 권한 없음
-    @ExceptionHandler(SecurityException.class)
-    public ResponseEntity<ApiErrorResponse> handleForbidden(SecurityException e) {
-        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(
-                ApiErrorResponse.of(HttpStatus.FORBIDDEN, e.getMessage())
-        );
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiErrorResponse> handleAccesDenied(AccessDeniedException e) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiErrorResponse.of(HttpStatus.FORBIDDEN, e.getMessage()));
     }
 
     // 404 리소스를 찾을 수 없음

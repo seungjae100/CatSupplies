@@ -1,12 +1,14 @@
 package com.web.catsupplies.common.config;
 
-import com.web.catsupplies.common.jwt.CompanyDetailsSerevice;
+import com.web.catsupplies.common.jwt.CompanyDetailsService;
 import com.web.catsupplies.common.jwt.CustomUserDetailsService;
 import com.web.catsupplies.common.jwt.JwtAuthenticationFilter;
 import com.web.catsupplies.common.jwt.JwtTokenProvider;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -21,7 +23,12 @@ public class SecurityConfig {
 
     private final JwtTokenProvider jwtTokenProvider;
     private final CustomUserDetailsService userDetailsService; // 직접 만든 UserDetailsService 생성자 주입
-    private final CompanyDetailsSerevice companyDetailsSerevice;
+    private final CompanyDetailsService companyDetailsService;
+
+    @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, companyDetailsService);
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
@@ -56,6 +63,7 @@ public class SecurityConfig {
                         // 제품 상세 조회는 구분
                         .requestMatchers("/api/products/user/**").hasRole("USER")
                         .requestMatchers("/api/products/company/**").hasRole("COMPANY")
+                        .requestMatchers("/api/products/list/company/**").hasRole("COMPANY")
 
                         // 제품 등록, 수정, 삭제는 기업만
                         .requestMatchers("/api/products/create", "/api/products/update/**", "/api/products/delete").hasRole("COMPANY")
@@ -75,12 +83,17 @@ public class SecurityConfig {
                         // 그 외는 인증필요
                         .anyRequest().authenticated()
                 )
-                .addFilterBefore(new JwtAuthenticationFilter(jwtTokenProvider, userDetailsService, companyDetailsSerevice), UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration configuration) throws Exception {
+        return configuration.getAuthenticationManager();
     }
 }

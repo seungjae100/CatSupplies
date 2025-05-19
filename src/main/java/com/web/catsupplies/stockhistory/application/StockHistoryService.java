@@ -1,5 +1,6 @@
 package com.web.catsupplies.stockhistory.application;
 
+import com.web.catsupplies.common.exception.AccessDeniedException;
 import com.web.catsupplies.common.exception.NotFoundException;
 import com.web.catsupplies.stock.domain.Stock;
 import com.web.catsupplies.stock.repository.StockRepository;
@@ -25,7 +26,7 @@ public class StockHistoryService {
                 .orElseThrow(() -> new NotFoundException("해당 제품이 존재하지 않습니다."));
 
         if (!stock.getProduct().getCompany().getId().equals(companyId)) {
-            throw new SecurityException("조회 권한이 없습니다.");
+            throw new AccessDeniedException("조회 권한이 없습니다.");
         }
 
         List<StockHistory> histories =

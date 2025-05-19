@@ -1,13 +1,16 @@
 package com.web.catsupplies.product.controller;
 
+import com.web.catsupplies.common.exception.AccessDeniedException;
 import com.web.catsupplies.common.jwt.CompanyDetails;
 import com.web.catsupplies.product.application.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -71,8 +74,14 @@ public class ProductController {
             description = "JWT 인증필요, 기업 제품 목록 조회 가능, 사용자 조회 가능(홈페이지)",
             security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
     )
+    @PreAuthorize("hasRole('COMPANY')")
     @GetMapping("/list")
     public ResponseEntity<List<ProductListResponse>> getProductsByCompany(@AuthenticationPrincipal CompanyDetails companyDetails) {
+
+        if (companyDetails == null) {
+            throw new AccessDeniedException("기업 로그인이 필요합니다.");
+        }
+
         Long companyId = companyDetails.getCompanyId();
         List<ProductListResponse> products = productService.getProductsByCompany(companyId);
         return ResponseEntity.ok(products);
@@ -81,8 +90,7 @@ public class ProductController {
     // 제품목록 전체 조회 ( 로그인, 비로그인 )
     @Operation(
             summary = "제품목록 전체 조회",
-            description = "JWT 없이 사용가능",
-            security = @SecurityRequirement(name = "") // JWT 인증 제외
+            description = "JWT 없이 사용가능"
     )
     @GetMapping("/all/list")
     public ResponseEntity<List<ProductListResponse>> getAllProducts() {
@@ -108,10 +116,17 @@ public class ProductController {
             description = "JWT 인증필요, 기업 제품 상세 조회 가능, 사용자 조회 가능(홈페이지)    ",
             security = @SecurityRequirement(name = "jwtAuth") // JWT 인증
     )
+    @PreAuthorize("hasRole('COMPANY')")
     @GetMapping("/list/company/{productId}")
     public ResponseEntity<ProductDetailForCompanyResponse> getProductDetailForCompany(@PathVariable Long productId,
                                                                                       @AuthenticationPrincipal CompanyDetails companyDetails) {
-        ProductDetailForCompanyResponse response = productService.getProductDetailForCompany(productId, companyDetails.getCompanyId());
+        if (companyDetails == null) {
+            throw new AccessDeniedException("기업 계정이 필요합니다.");
+        }
+
+        Long companyId = companyDetails.getCompanyId();
+
+        ProductDetailForCompanyResponse response = productService.getProductDetailForCompany(productId, companyId);
         return ResponseEntity.ok(response);
     }
 

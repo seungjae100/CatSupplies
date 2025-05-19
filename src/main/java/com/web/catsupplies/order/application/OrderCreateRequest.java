@@ -13,7 +13,7 @@ import lombok.NoArgsConstructor;
 public class OrderCreateRequest {
 
     @NotNull
-    @Schema(description = "제품 기본키입니다.", example = "12")
+    @Schema(description = "제품 기본키입니다.")
     private Long productId;
 
     @Min(1) @NotNull

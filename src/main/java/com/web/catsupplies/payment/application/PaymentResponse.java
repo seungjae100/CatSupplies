@@ -13,10 +13,10 @@ import java.time.LocalDateTime;
 @Builder
 public class PaymentResponse {
 
-    @Schema(description = "결제 기본키를 나타냅니다.", example = "245")
+    @Schema(description = "결제 기본키를 나타냅니다.")
     private Long paymentId;
 
-    @Schema(description = "실제 마지막 결제 금액을 나타냅니다.", example = "39,900원")
+    @Schema(description = "실제 마지막 결제 금액을 나타냅니다.", example = "39900")
     private int amount;
 
     @Schema(description = "결제 상태를 나타냅니다.", example = "READY, PAID, FAILED")

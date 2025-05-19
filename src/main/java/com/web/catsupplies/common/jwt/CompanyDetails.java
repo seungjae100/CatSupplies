@@ -10,7 +10,7 @@ import java.util.Collection;
 import java.util.List;
 
 @Getter
-public class CompanyDetails implements UserDetails {
+public class CompanyDetails implements UserDetails{
 
     private final Company company;
 

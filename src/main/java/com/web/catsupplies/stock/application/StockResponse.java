@@ -9,13 +9,13 @@ import lombok.Getter;
 @Getter
 public class StockResponse {
 
-    @Schema(description = "재고 고유 ID", example = "4")
+    @Schema(description = "재고 고유 ID")
     private Long stockId;
 
-    @Schema(description = "제품의 코드를 조회합니다.", example = "PRO-002")
+    @Schema(description = "제품의 코드를 조회합니다.", example = "TEST-001")
     private Long productId;
 
-    @Schema(description = "제품의 재고수량을 조회합니다.", example = "52 개")
+    @Schema(description = "제품의 재고수량을 조회합니다.", example = "52")
     private int quantity;
 
     public static StockResponse from(Stock stock) {

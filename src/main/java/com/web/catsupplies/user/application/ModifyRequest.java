@@ -18,9 +18,9 @@ public class ModifyRequest {
     @Schema(description = "이름을 입력합니다.", example = "홍길동")
     private String name;
 
-    @Schema(description = "핸드폰번호", example = "핸드폰번호 - 없이 작성")
+    @Schema(description = "핸드폰번호", example = "010-1234-1234")
     private String phone;
 
-    @Schema(description = "주소를 입력합니다.", example = "경기도 00시 00~")
+    @Schema(description = "주소를 입력합니다.", example = "경기도")
     private String address;
 }

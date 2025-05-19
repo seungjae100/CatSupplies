@@ -1,5 +1,6 @@
 package com.web.catsupplies.product.application;
 
+import com.web.catsupplies.common.exception.AccessDeniedException;
 import com.web.catsupplies.common.exception.NotFoundException;
 import com.web.catsupplies.company.domain.Company;
 import com.web.catsupplies.company.repository.CompanyRepository;
@@ -56,7 +57,7 @@ public class ProductService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 제품이 존재하지 않습니다."));
         // 기업 로그인으로 본인인지 확인
         if (!product.getCompany().getId().equals(companyId)) {
-            throw new SecurityException("해당 제품을 수정할 권한이 없습니다.");
+            throw new AccessDeniedException("해당 제품을 수정할 권한이 없습니다.");
         }
         // 수정 시 제품코드 중복확인
         if (request.getCode() != null && !request.getCode().equals(product.getCode())) {
@@ -87,7 +88,7 @@ public class ProductService {
                 .orElseThrow(() -> new IllegalArgumentException("해당 제품이 존재하지 않습니다."));
         // 해당 제품을 등록한 본인 회사인지 비교하여 확인
         if (!product.getCompany().getId().equals(companyId)) {
-            throw new SecurityException("해당 제품을 삭제할 권한이 없습니다.");
+            throw new AccessDeniedException("해당 제품을 삭제할 권한이 없습니다.");
         }
 
         if (product.isDeleted()) {
@@ -131,7 +132,7 @@ public class ProductService {
                 .orElseThrow(() -> new NotFoundException("해당 제품이 존재하지 않습니다."));
 
         if (!product.getCompany().getId().equals(companyId)) {
-            throw new SecurityException("본인의 제품만 조회할 수 있습니다.");
+            throw new AccessDeniedException("본인의 제품만 조회할 수 있습니다.");
         }
 
         return ProductDetailForCompanyResponse.fromEntity(product);

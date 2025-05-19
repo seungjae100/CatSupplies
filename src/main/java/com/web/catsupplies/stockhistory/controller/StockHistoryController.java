@@ -4,6 +4,7 @@ import com.web.catsupplies.common.jwt.CompanyDetails;
 import com.web.catsupplies.stockhistory.application.StockHistoryResponse;
 import com.web.catsupplies.stockhistory.application.StockHistoryService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;

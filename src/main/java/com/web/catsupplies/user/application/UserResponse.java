@@ -1,10 +1,14 @@
 package com.web.catsupplies.user.application;
 
 import com.web.catsupplies.user.domain.User;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
+@NoArgsConstructor
+@AllArgsConstructor
 @Builder
 public class UserResponse {
     // 사용자 정보 조회를 위한 응답 DTO

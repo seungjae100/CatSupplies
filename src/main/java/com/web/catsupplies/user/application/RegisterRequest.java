@@ -14,7 +14,7 @@ public class RegisterRequest {
 
     @Email
     @NotBlank(message = "이메일을 입력해주세요.")
-    @Schema(description = "이메일을 입력합니다.", example = "test@gmail.com")
+    @Schema(description = "이메일을 입력합니다.", example = "user@gmail.com")
     private String email;
 
     @NotBlank(message = "비밀번호를 입력해주세요.")
@@ -27,10 +27,10 @@ public class RegisterRequest {
     private String name;
 
     @NotBlank(message = "전화번호를 입력해주세요.")
-    @Schema(description = "핸드폰번호", example = "핸드폰번호 - 없이 작성")
+    @Schema(description = "핸드폰번호", example = "010-1234-1234")
     private String phone;
 
     @NotBlank(message = "주소를 입력해주세요.")
-    @Schema(description = "주소를 입력합니다.", example = "경기도 00시 00~")
+    @Schema(description = "주소를 입력합니다.", example = "경기도")
     private String address;
 }

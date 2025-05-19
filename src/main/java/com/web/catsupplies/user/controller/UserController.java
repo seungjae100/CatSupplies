@@ -5,6 +5,7 @@ import com.web.catsupplies.common.jwt.CookieUtils;
 import com.web.catsupplies.common.jwt.CustomUserDetails;
 import com.web.catsupplies.user.application.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -28,8 +29,7 @@ public class UserController {
     // 회원가입
     @Operation(
             summary = "회원가입",
-            description = "JWT 없이 사용가능",
-            security = @SecurityRequirement(name = "") // JWT 인증 제외
+            description = "JWT 없이 사용가능"
     )
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody @Valid RegisterRequest request) {
@@ -40,8 +40,7 @@ public class UserController {
     // 로그인
     @Operation(
             summary = "로그인",
-            description = "JWT 없이 사용가능",
-            security = @SecurityRequirement(name = "") // JWT 인증 제외
+            description = "JWT 없이 사용가능"
     )
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@RequestBody @Valid LoginRequest request, HttpServletResponse response) {

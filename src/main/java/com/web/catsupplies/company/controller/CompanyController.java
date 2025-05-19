@@ -5,6 +5,7 @@ import com.web.catsupplies.common.jwt.CompanyDetails;
 import com.web.catsupplies.common.jwt.CookieUtils;
 import com.web.catsupplies.company.application.*;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,8 +28,7 @@ public class CompanyController {
     // 기업 회원가입
     @Operation(
             summary = "회원가입",
-            description = "JWT 없이 사용가능",
-            security = @SecurityRequirement(name = "") // JWT 인증 제외
+            description = "JWT 없이 사용가능"
     )
     @PostMapping("/register")
     public ResponseEntity<String> register(@RequestBody @Valid CompanyRegisterRequest request) {
@@ -39,8 +39,7 @@ public class CompanyController {
     // 로그인
     @Operation(
             summary = "로그인",
-            description = "JWT 없이 사용가능",
-            security = @SecurityRequirement(name = "") // JWT 인증 제외
+            description = "JWT 없이 사용가능"
     )
     @PostMapping("/login")
     public ResponseEntity<CompanyLoginResponse> login(@RequestBody @Valid CompanyLoginRequest request, HttpServletResponse response) {
