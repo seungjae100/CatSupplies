@@ -1,21 +1,21 @@
 #!/bin/sh
 # shellcheck disable=SC1128
 
-
-# host와 port 분리
+# Split host and port
 HOST=$(echo "$1" | cut -d: -f1)
 PORT=$(echo "$1" | cut -d: -f2)
 shift
 
-# -- 제거
+# Remove '--' if exists
 if [ "$1" = "--" ]; then
   shift
 fi
 
+# Wait until the host:port is available
 until nc -z "$HOST" "$PORT"; do
-  >&2 echo "$HOST:$PORT 사용할 수 있기를 기다리고 있습니다 .."
+  >&2 echo "$HOST:$PORT is not available yet. Waiting..."
   sleep 1
 done
 
->&2 echo "$HOST:$PORT 가 UP- 실행 명령입니다"
+>&2 echo "$HOST:$PORT is up - executing command"
 exec "$@"
