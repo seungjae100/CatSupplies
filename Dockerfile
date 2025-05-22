@@ -11,5 +11,8 @@ COPY target/CatSupplies-0.0.1-SNAPSHOT.jar /app.jar
 COPY wait-for-it.sh /wait-for-it.sh
 RUN chmod +x /wait-for-it.sh
 
-# 5. wait-for-it.sh를 통해 DB가 떠 있는지 확인하고 Spring Boot 실행
+# 5. 포트 개방
+EXPOSE 8080
+
+# 6. wait-for-it.sh를 통해 DB가 떠 있는지 확인하고 Spring Boot 실행
 ENTRYPOINT ["/wait-for-it.sh", "db:3306", "--", "java", "-jar", "/app.jar"]
