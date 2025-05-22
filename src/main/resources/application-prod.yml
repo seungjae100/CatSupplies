@@ -29,8 +29,6 @@ springdoc:
     enabled: true
     path: /v3/api-docs
   swagger-ui:
-    csrf:
-      enabled: true
       path: /swagger-ui/index.html
 
 jwt:
