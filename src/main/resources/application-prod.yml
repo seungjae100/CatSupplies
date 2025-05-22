@@ -31,7 +31,7 @@ springdoc:
   swagger-ui:
     csrf:
       enabled: true
-      path: /swagger-ui.html
+      path: /swagger-ui/index.html
 
 jwt:
   secretKey: ${JWT_SECRET}
